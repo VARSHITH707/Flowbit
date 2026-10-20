@@ -4,12 +4,22 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v2.0.3](#v203--2026-10-21) | 2026-10-21 | CSV export includes the original wording |
 | [v2.0.2](#v202--2026-10-21) | 2026-10-21 | Everything stays in the project folder (nothing on C) |
 | [v2.0.1](#v201--2026-10-21) | 2026-10-21 | Published on GitHub (MIT), hands-on test sheet |
 | [v2.0](#v20--2026-10-20-evening) | 2026-10-20, evening | Smart mode, memory that learns, styles per app |
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v2.0.3 · 2026-10-21
+**Why:** I opened `history.db` in Notepad and saw unreadable text. It's a database, so a readable file was needed.
+### Changed
+- The History → Export → CSV file now has an "original (before AI cleanup)" column next to the final text and timestamp.
+### Tested
+- 108 tests pass (the export test now checks the original wording). Exported my 13 dictations to `userdata\history.csv`.
 
 ---
 

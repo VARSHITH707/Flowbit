@@ -76,11 +76,12 @@ def test_history_persists_across_instances(home):
 def test_history_prune_and_export(home):
     h = History()
     h.add("old"); h.db.execute("UPDATE entries SET ts = ?", (time.time() - 10 * 86400,)); h.db.commit()
-    h.add("new")
+    h.add("new", raw="before cleanup")
     assert h.prune(5) == 1 and [e.text for e in h.list()] == ["new"]
     for fmt, name in (("json", "o.json"), ("csv", "o.csv"), ("txt", "o.txt")):
         out = h.export(home / name, fmt)
         assert "new" in out.read_text(encoding="utf-8-sig")
+    assert "before cleanup" in (home / "o.csv").read_text(encoding="utf-8-sig")  # original wording is exported too
     with pytest.raises(ValueError):
         h.export(home, "json")
     with pytest.raises(ValueError):

@@ -70,8 +70,9 @@ class History:
         elif fmt == "csv":
             with dest.open("w", newline="", encoding="utf-8-sig") as f:
                 w = csv.writer(f)
-                w.writerow(["id", "timestamp", "language", "duration_s", "model", "text"])
-                w.writerows([e.id, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(e.ts)), e.language, e.duration, e.model, e.text] for e in entries)
+                w.writerow(["id", "timestamp", "language", "duration_s", "model", "text", "original (before AI cleanup)"])
+                w.writerows([e.id, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(e.ts)), e.language, e.duration, e.model, e.text, e.raw]
+                            for e in entries)
         elif fmt == "txt":
             dest.write_text("\n\n".join(f"[{time.strftime('%Y-%m-%d %H:%M', time.localtime(e.ts))}] {e.text}" for e in entries), encoding="utf-8")
         else:
