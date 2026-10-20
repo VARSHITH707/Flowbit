@@ -81,7 +81,8 @@ def test_history_prune_and_export(home):
     for fmt, name in (("json", "o.json"), ("csv", "o.csv"), ("txt", "o.txt")):
         out = h.export(home / name, fmt)
         assert "new" in out.read_text(encoding="utf-8-sig")
-    assert "before cleanup" in (home / "o.csv").read_text(encoding="utf-8-sig")  # original wording is exported too
+    for name in ("o.csv", "o.txt"):  # original wording is exported too
+        assert "before cleanup" in (home / name).read_text(encoding="utf-8-sig")
     with pytest.raises(ValueError):
         h.export(home, "json")
     with pytest.raises(ValueError):

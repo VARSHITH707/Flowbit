@@ -74,7 +74,10 @@ class History:
                 w.writerows([e.id, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(e.ts)), e.language, e.duration, e.model, e.text, e.raw]
                             for e in entries)
         elif fmt == "txt":
-            dest.write_text("\n\n".join(f"[{time.strftime('%Y-%m-%d %H:%M', time.localtime(e.ts))}] {e.text}" for e in entries), encoding="utf-8")
+            def block(e) -> str:
+                s = f"[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(e.ts))}] {e.text}"
+                return s + (f"\n    (you said: {e.raw})" if e.raw and e.raw.strip() != e.text.strip() else "")
+            dest.write_text("\n\n".join(block(e) for e in entries), encoding="utf-8")
         else:
             raise ValueError(f"Unknown format {fmt!r}")
         return dest

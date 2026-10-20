@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v2.0.4](#v204--2026-10-21) | 2026-10-21 | Text export readable in Notepad, with original wording |
 | [v2.0.3](#v203--2026-10-21) | 2026-10-21 | CSV export includes the original wording |
 | [v2.0.2](#v202--2026-10-21) | 2026-10-21 | Everything stays in the project folder (nothing on C) |
 | [v2.0.1](#v201--2026-10-21) | 2026-10-21 | Published on GitHub (MIT), hands-on test sheet |
@@ -11,6 +12,15 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v2.0.4 · 2026-10-21
+**Why:** No Microsoft Office on this PC, so a CSV in Excel is no use. History has to be readable in Notepad.
+### Changed
+- History → Export → `.txt` now shows the time to the second, and adds "(you said: ...)" under any entry the AI cleaned up.
+### Tested
+- 108 tests pass. Exported 14 dictations to `userdata\history.txt`.
 
 ---
 
