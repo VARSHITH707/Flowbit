@@ -5,6 +5,8 @@ import json
 import os
 import sys
 import tempfile
+
+import _projtmp  # noqa: F401  (temp files stay in the project)
 import time
 import wave
 from pathlib import Path

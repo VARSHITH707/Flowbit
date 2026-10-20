@@ -1,4 +1,5 @@
 import os, subprocess, sys, tempfile, time
+import _projtmp  # noqa: F401  (temp files stay in the project)
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))

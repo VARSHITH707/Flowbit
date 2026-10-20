@@ -1,4 +1,4 @@
-"""Model availability + download with progress (Hugging Face cache).
+"""Model availability + download with progress (Hugging Face cache layout, in <app folder>\\models).
 
 Each selectable model is pinned to one commit of its repository, so a later change to the repo's
 `main` branch cannot swap the weights we load. Update REVISIONS deliberately (and re-run the benchmark)
@@ -8,6 +8,8 @@ from pathlib import Path
 
 import huggingface_hub
 from faster_whisper.utils import _MODELS  # size -> HF repo id
+
+from .config import MODELS_DIR
 
 MODELS = {"small": "~0.5 GB", "medium": "~1.5 GB", "large-v3-turbo": "~1.6 GB"}
 DEFAULT_MODEL = "large-v3-turbo"
@@ -22,7 +24,8 @@ _FILES = ["config.json", "preprocessor_config.json", "model.bin", "tokenizer.jso
 def _fetch(model: str, **kw) -> str:
     if model not in _MODELS:
         raise ValueError(f"Unknown model {model!r}")
-    return huggingface_hub.snapshot_download(_MODELS[model], revision=REVISIONS.get(model), allow_patterns=_FILES, **kw)
+    return huggingface_hub.snapshot_download(_MODELS[model], revision=REVISIONS.get(model), allow_patterns=_FILES,
+                                             cache_dir=MODELS_DIR, **kw)
 
 
 def local_path(model: str) -> Path:
@@ -60,7 +63,7 @@ def download(model: str, on_progress=None) -> str:
 
 
 def delete(model: str) -> bool:
-    """Remove a downloaded model from the Hugging Face cache. Only touches the model's own cache folder."""
+    """Remove a downloaded model from the models folder. Only touches the model's own cache folder."""
     import shutil
     try:
         snap = local_path(model)  # .../models--org--name/snapshots/<rev>

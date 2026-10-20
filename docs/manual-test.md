@@ -30,4 +30,4 @@ Fill in **Result** as you go: `pass`, `fail`, or what happened. Send it back and
 | 19 | Other language (optional) | Settings → Language → your language; dictate | Correct text in that language | |
 | 20 | History | Open the **History** tab | Every dictation is listed; search and Copy original work | |
 
-**If something fails:** note the test number and what you saw. The log is in `%APPDATA%\VoiceType` (Settings → *Open data folder*). It never contains your words.
+**If something fails:** note the test number and what you saw. The log is in `userdata\` inside the VoiceType folder (Settings → *Open data folder*). It never contains your words.

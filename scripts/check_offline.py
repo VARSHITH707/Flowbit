@@ -3,6 +3,8 @@ import os
 import socket
 import sys
 import tempfile
+
+import _projtmp  # noqa: F401  (temp files stay in the project)
 import wave
 from pathlib import Path
 

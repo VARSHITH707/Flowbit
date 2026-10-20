@@ -13,6 +13,14 @@ def home(tmp_path, monkeypatch):
     return tmp_path
 
 
+def test_data_and_models_live_in_the_app_folder(monkeypatch):
+    from voicetype import config, models
+    monkeypatch.delenv("VOICETYPE_HOME")
+    assert config.data_dir() == config.APP_DIR / "userdata"
+    assert models.MODELS_DIR == config.APP_DIR / "models"
+    assert (config.APP_DIR / "voicetype" / "config.py").exists()  # APP_DIR is the project root
+
+
 def test_defaults_when_missing():
     c = Config.load()
     assert c.model == "large-v3-turbo" and c.language == "en" and c.history_enabled

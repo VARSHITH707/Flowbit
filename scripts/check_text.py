@@ -4,6 +4,8 @@ import os
 import re
 import sys
 import tempfile
+
+import _projtmp  # noqa: F401  (temp files stay in the project)
 import wave
 from pathlib import Path
 

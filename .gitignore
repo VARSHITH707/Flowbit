@@ -8,3 +8,8 @@ build/
 dist/
 *.spec.bak
 .env
+
+# your own data and downloaded models: never publish
+/userdata/
+/models/
+/.tmp/

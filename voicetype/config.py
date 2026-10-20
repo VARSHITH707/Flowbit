@@ -1,19 +1,21 @@
-"""Persistent settings (JSON in %APPDATA%\\VoiceType). Bad values fall back to defaults; writes are atomic."""
+"""Persistent settings (JSON in the app folder's userdata\\). Bad values fall back to defaults; writes are atomic."""
 import json
 import logging
 import os
 from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 
+from . import APP_DIR  # the project folder, or the .exe's folder: everything VoiceType writes lives there
 from .hotkeys import DEFAULTS as HOTKEY_DEFAULTS, parse
 
 log = logging.getLogger(__name__)
 
+MODELS_DIR = APP_DIR / "models"  # speech models (Hugging Face cache layout)
+
 
 def data_dir() -> Path:
-    """VOICETYPE_HOME overrides the location (used by tests)."""
-    base = os.environ.get("VOICETYPE_HOME") or os.path.join(os.environ.get("APPDATA", str(Path.home())), "VoiceType")
-    p = Path(base)
+    """Settings, history, memory and log: <app folder>\\userdata. VOICETYPE_HOME overrides it (used by tests)."""
+    p = Path(os.environ.get("VOICETYPE_HOME") or APP_DIR / "userdata")
     p.mkdir(parents=True, exist_ok=True)
     return p
 

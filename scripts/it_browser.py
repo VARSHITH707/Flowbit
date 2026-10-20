@@ -3,6 +3,8 @@ Read-back: the page mirrors the field value into document.title, which we read f
 import subprocess
 import sys
 import tempfile
+
+import _projtmp  # noqa: F401  (temp files stay in the project)
 import time
 from pathlib import Path
 

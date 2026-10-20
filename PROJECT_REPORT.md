@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | Project | VoiceType, a private voice-typing app for Windows 11 (local replacement for Wispr Flow) |
-| Location | `Z:\Wispr Flow` (code), `%APPDATA%\VoiceType` (user data, created on first run) |
+| Location | Everything in `Z:\Wispr Flow`: code, `userdata\` (history, settings, memory, log), `models\` (speech models). Nothing on C: |
 | Machine | Windows 11 laptop, RTX 4060 Laptop GPU (8 GB), Python 3.11 |
-| Current version | **v2.0.1** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
+| Current version | **v2.0.2** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
 | Repository | https://github.com/VARSHITH707/Unlimited-WisprFlow (public, MIT license) |
 | Status | Working on this machine; first hands-on test passed. Next: improve and fine-tune the models |
 | Last updated | 2026-10-21 |
@@ -41,6 +41,7 @@ Add one row each time something is built or changed. Newest at the bottom.
 | 2026-10-21 | — | `PROJECT_REPORT.md`, `VERSION_HISTORY.md`, `README.md` | Created this report and the version history; fixed two broken paths in the README | Done |
 | 2026-10-21 | — | `docs/manual-test.md` | Hands-on test sheet (20 tests); first real run on my own voice | Working well enough for now; more tuning planned |
 | 2026-10-21 | — | GitHub: [VARSHITH707/Unlimited-WisprFlow](https://github.com/VARSHITH707/Unlimited-WisprFlow), `LICENSE` | Published as a public repo under the MIT license. Only I and collaborators can change it; `main` is protected | Anyone can clone and use it |
+| 2026-10-21 | — | `voicetype/__init__.py`, `config.py`, `models.py`, `pytest.ini`, `scripts/_projtmp.py`, `.gitignore` | Everything the project writes now stays in `Z:\Wispr Flow`: `userdata\` (history, settings, memory, log), `models\` (speech models), `.tmp\` (temporary files). All three are excluded from git. Shared programs (Python, Ollama) stay on C | 108 tests pass; offline check: 0 outside connections, models load from Z: |
 
 ## 3. What was delivered
 | Deliverable | Where |

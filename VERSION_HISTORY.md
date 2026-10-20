@@ -4,11 +4,36 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v2.0.2](#v202--2026-10-21) | 2026-10-21 | Everything stays in the project folder (nothing on C) |
 | [v2.0.1](#v201--2026-10-21) | 2026-10-21 | Published on GitHub (MIT), hands-on test sheet |
 | [v2.0](#v20--2026-10-20-evening) | 2026-10-20, evening | Smart mode, memory that learns, styles per app |
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v2.0.2 · 2026-10-21
+**Theme:** Keep everything that belongs to this project inside its own folder.
+**Why:** All of my AI projects live on Z:. VoiceType was saving history in `C:\Users\...\AppData\Roaming\VoiceType`, models in the shared Hugging Face cache on C, and test files in the C temp folder.
+
+### Changed
+| What | Before (on C) | Now |
+|---|---|---|
+| History, settings, memory, log | `%APPDATA%\VoiceType` | `userdata\` |
+| Speech models | `%USERPROFILE%\.cache\huggingface` | `models\` |
+| Temporary files (app, tests, scripts) | `%TEMP%` | `.tmp\` |
+
+- All three folders are excluded from git, so personal data and models are never published.
+- For the packaged `.exe`, the same folders are created next to `VoiceType.exe`.
+- `VOICETYPE_HOME` still overrides the data folder.
+- Updated the README, privacy doc and `.env.example`.
+- The 3 speech models VoiceType had downloaded were copied to `models\`. Other projects' models on C were left alone.
+- Stays on C on purpose: shared programs used by other projects too (Python 3.11 that `.venv` runs on, Ollama and its server). The local AI model was already on `I:\ollama\models`.
+
+### Tested
+- 108 automated tests pass (new: data and models resolve inside the app folder).
+- `check_offline.py` passes, with models loading from `Z:\Wispr Flow\models` and temp files landing in `.tmp\`.
 
 ---
 

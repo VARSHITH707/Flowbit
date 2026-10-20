@@ -1,7 +1,7 @@
 # Build the standalone VoiceType app (PyInstaller, one folder) into dist\VoiceType.
 #   powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1            # GPU build (bundles NVIDIA cuBLAS/cuDNN, ~2.3 GB)
 #   powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1 -CpuOnly   # CPU build, much smaller
-# Models are NOT bundled: they are downloaded on first use into the Hugging Face cache.
+# Models are NOT bundled: they are downloaded on first use into a models folder next to the .exe.
 param([switch]$CpuOnly)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot

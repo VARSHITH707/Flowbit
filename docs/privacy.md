@@ -9,7 +9,7 @@ Speech is turned into text **on this PC**. VoiceType has no account, no subscrip
 3. The text is pasted into the window that was focused when you started recording (or copied to the clipboard; see below).
 
 ## What is stored on disk
-All in `%APPDATA%\VoiceType` (override with `VOICETYPE_HOME`). The Settings page has an *Open data folder* button.
+All in `userdata\` inside the VoiceType folder (override with `VOICETYPE_HOME`). The folder is excluded from git, so it is never published. The Settings page has an *Open data folder* button.
 
 | File | Contents | How to remove |
 |---|---|---|
@@ -20,7 +20,7 @@ All in `%APPDATA%\VoiceType` (override with `VOICETYPE_HOME`). The Settings page
 | `memory\learned.json` | Word fixes learned from your corrections (*heard* -> *written as*, how often, when) | Memory tab: Forget selected / Forget everything, or delete the folder |
 | `memory\examples.json` | Up to 20 recent edits you made to AI-cleaned text (the cleaned sentence and what you changed it to). A few are shown to the local AI as examples of your style | Memory tab: Forget everything, or delete the file |
 
-Speech models live in the Hugging Face cache (`%USERPROFILE%\.cache\huggingface`, or `HF_HOME`). Delete them from the Models tab.
+Speech models live in `models\` inside the VoiceType folder (also excluded from git). Delete them from the Models tab.
 
 ## Smart mode: the local AI
 In Smart mode the recognised text is sent to **Ollama running on this PC** (`http://127.0.0.1:11434`, never another address; the code refuses anything else). With it go your vocabulary/learned word spellings, the writing style for the app you are dictating into (only the category, such as "email", not the window title), and up to 3 of your recent edit examples. Ollama keeps the model in GPU memory for 30 minutes after the last use. Verified: with every non-local network connection blocked, Smart mode still works and makes **0** outside connections (`scripts/check_offline.py`). Downloading the AI model itself (`ollama pull`) is a one-time download you start.

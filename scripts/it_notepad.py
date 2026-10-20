@@ -3,6 +3,8 @@ Read-back is from the saved file: Notepad's WinUI edit control is unreliable thr
 import subprocess
 import sys
 import tempfile
+
+import _projtmp  # noqa: F401  (temp files stay in the project)
 import time
 from pathlib import Path
 

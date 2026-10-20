@@ -2,6 +2,8 @@
 import os
 import sys
 import tempfile
+
+import _projtmp  # noqa: F401  (temp files stay in the project)
 from pathlib import Path
 
 os.environ["VOICETYPE_HOME"] = tempfile.mkdtemp(prefix="vt_shots_home_")

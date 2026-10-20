@@ -1,4 +1,4 @@
-"""Local memory: what VoiceType learns from your corrections. Plain JSON in %APPDATA%\\VoiceType\\memory.
+"""Local memory: what VoiceType learns from your corrections. Plain JSON in userdata\\memory inside the app folder.
 
 learned.json   word corrections learned from your edits   {"heard": "...", "written": "...", "count": n, ...}
 examples.json  your recent edits of AI-cleaned text (cleaned -> what you kept), used as style examples

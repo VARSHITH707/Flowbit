@@ -61,12 +61,12 @@ A local AI (qwen2.5 7B through Ollama on `127.0.0.1`) tidies what you said befor
 Safety: if the AI's version contains words you never said, or drops most of it, or the AI is not running, VoiceType pastes the plain transcript instead and tells you why. **Undo AI edit** (Home tab, and *Copy original* in History) gives you exactly what was recognised. Writing style can be set per kind of app (email, work chat, personal chat, code, other); casual style drops the final period in chat apps, as Wispr Flow does.
 
 ### Memory: it learns from your corrections
-After pasting, VoiceType keeps an eye on that same text box. When you fix a word it typed (for example *cubernetes* to *Kubernetes*) and move on, it remembers the fix in `%APPDATA%\VoiceType\memory` and writes it your way next time. **Names** (you capitalised them) apply after one fix; **other words** only after you make the same fix twice, so a one-off edit never rewrites future text; content changes such as *Friday* to *Monday* are never learned. See and delete what it learned in the **Memory** tab. Works in apps that expose their text to Windows (verified: Notepad, Edge); elsewhere it quietly does nothing. Turn it off in Settings.
+After pasting, VoiceType keeps an eye on that same text box. When you fix a word it typed (for example *cubernetes* to *Kubernetes*) and move on, it remembers the fix in `userdata\memory` (inside the VoiceType folder) and writes it your way next time. **Names** (you capitalised them) apply after one fix; **other words** only after you make the same fix twice, so a one-off edit never rewrites future text; content changes such as *Friday* to *Monday* are never learned. See and delete what it learned in the **Memory** tab. Works in apps that expose their text to Windows (verified: Notepad, Edge); elsewhere it quietly does nothing. Turn it off in Settings.
 
 If you switch to another window while speaking, the text is **not** pasted anywhere: it is copied to the clipboard and you are told (you can change this in Settings). Hotkeys can be changed in **Settings**; if you also run another dictation tool, give the two apps different hotkeys.
 
 ## Settings and data
-Settings, history and the log are in `%APPDATA%\VoiceType` (Settings has an *Open data folder* button). Audio is never saved. Details: [docs/privacy.md](docs/privacy.md).
+Everything VoiceType saves stays **inside its own folder**: settings, history, memory and the log in `userdata\`, speech models in `models\`. Both are excluded from git. (Settings has an *Open data folder* button). Audio is never saved. Details: [docs/privacy.md](docs/privacy.md).
 
 | Setting | Notes |
 |---|---|
