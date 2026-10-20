@@ -1,0 +1,58 @@
+"""Dark/light/system theme as one stylesheet with a few colour tokens."""
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QGuiApplication
+
+PALETTES = {
+    "dark": dict(bg="#16181d", panel="#1f232b", text="#e8eaed", muted="#9aa0a6", accent="#4f8cff", border="#2e3440",
+                 good="#3ecf8e", bad="#ff6b6b", warn="#f5b942", input="#262b35"),
+    "light": dict(bg="#f6f7f9", panel="#ffffff", text="#1b1f24", muted="#5f6670", accent="#2563eb", border="#d5d9e0",
+                  good="#0f9d58", bad="#d93025", warn="#b26a00", input="#ffffff"),
+}
+
+_QSS = """
+* {{ font-family: 'Segoe UI', sans-serif; font-size: 10pt; }}
+QWidget {{ background: {bg}; color: {text}; }}
+QMainWindow, QDialog {{ background: {bg}; }}
+QLabel, QCheckBox {{ background: transparent; }}
+QTabWidget::pane {{ border: 1px solid {border}; background: {bg}; top: -1px; }}
+QTabBar::tab {{ background: {panel}; color: {muted}; padding: 8px 18px; border: 1px solid {border}; border-bottom: none; }}
+QTabBar::tab:selected {{ color: {text}; background: {bg}; border-bottom: 2px solid {accent}; }}
+QTabBar::tab:focus {{ outline: 1px solid {accent}; }}
+QGroupBox {{ border: 1px solid {border}; border-radius: 6px; margin-top: 14px; padding: 12px 8px 8px 8px; background: {panel}; }}
+QGroupBox::title {{ subcontrol-origin: margin; left: 10px; padding: 0 4px; color: {muted}; background: {panel}; }}
+QGroupBox QWidget {{ background: transparent; }}
+QPushButton {{ background: {panel}; border: 1px solid {border}; border-radius: 5px; padding: 6px 14px; }}
+QPushButton:hover {{ border-color: {accent}; }}
+QPushButton:focus {{ border: 2px solid {accent}; }}
+QPushButton:disabled {{ color: {muted}; }}
+QPushButton#primary {{ background: {accent}; color: white; border: none; font-weight: 600; }}
+QPushButton#primary:disabled {{ background: {border}; color: {muted}; }}
+QPushButton#danger {{ color: {bad}; }}
+QLineEdit, QComboBox, QSpinBox, QTextEdit, QPlainTextEdit, QListWidget, QTableWidget {{
+    background: {input}; border: 1px solid {border}; border-radius: 4px; padding: 4px; selection-background-color: {accent}; }}
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QTextEdit:focus, QListWidget:focus, QTableWidget:focus {{ border: 2px solid {accent}; }}
+QHeaderView::section {{ background: {panel}; color: {muted}; border: none; border-bottom: 1px solid {border}; padding: 4px; }}
+QProgressBar {{ border: 1px solid {border}; border-radius: 4px; text-align: center; background: {input}; }}
+QProgressBar::chunk {{ background: {accent}; }}
+QLabel#muted {{ color: {muted}; }}
+QLabel#title {{ font-size: 15pt; font-weight: 600; }}
+QLabel#error {{ color: {bad}; }}
+QFrame#card {{ background: {panel}; border: 1px solid {border}; border-radius: 8px; }}
+QFrame#errorcard {{ background: {panel}; border: 1px solid {bad}; border-radius: 8px; }}
+QCheckBox:focus {{ outline: 1px solid {accent}; }}
+"""
+
+
+def resolve(theme: str) -> str:
+    if theme in PALETTES:
+        return theme
+    scheme = QGuiApplication.styleHints().colorScheme()
+    return "light" if scheme == Qt.ColorScheme.Light else "dark"
+
+
+def colors(theme: str) -> dict:
+    return PALETTES[resolve(theme)]
+
+
+def apply_theme(app, theme: str) -> None:
+    app.setStyleSheet(_QSS.format(**colors(theme)))

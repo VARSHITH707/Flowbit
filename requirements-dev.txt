@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest==9.1.1
+psutil==7.2.2          # used by the integration/perf scripts
+bandit==1.9.4          # static security scan:  python -m bandit -r voicetype
+pip-audit==2.10.1      # dependency vulnerability scan:  python -m pip_audit
+pyinstaller            # only for building the standalone app (see README)

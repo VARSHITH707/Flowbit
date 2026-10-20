@@ -1,0 +1,10 @@
+.venv/
+.rea/
+__pycache__/
+.pytest_cache/
+*.wav
+data/
+build/
+dist/
+*.spec.bak
+.env

@@ -1,0 +1,18 @@
+# VoiceType runtime dependencies. Python 3.11 (tested with 3.11.15). Windows 11 x64.
+# Install:  uv venv --python 3.11 .venv  &&  uv pip install --python .venv\Scripts\python.exe -r requirements.txt
+#      or:  py -3.11 -m venv .venv  &&  .venv\Scripts\python -m pip install -r requirements.txt
+faster-whisper==1.2.1
+ctranslate2==4.8.3
+huggingface-hub==2.2.0
+numpy==2.4.6
+sounddevice==0.5.6
+PySide6==6.12.0
+pywin32==312
+# Learning from your corrections: reads the focused text box through Windows UI Automation (local only)
+uiautomation==2.0.29
+comtypes==1.4.17
+# Smart mode also needs Ollama (https://ollama.com, a separate Windows app) with: ollama pull qwen2.5:7b-instruct-q4_K_M
+# CUDA 12 runtime libraries for GPU transcription (CTranslate2 needs cuBLAS 12 + cuDNN 9; no PyTorch required).
+# Skip these two lines for a CPU-only install; the app falls back to the CPU automatically.
+nvidia-cublas-cu12==12.9.2.10
+nvidia-cudnn-cu12==9.27.0.42
