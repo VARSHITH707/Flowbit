@@ -65,6 +65,17 @@ After pasting, VoiceType keeps an eye on that same text box. When you fix a word
 
 If you switch to another window while speaking, the text is **not** pasted anywhere: it is copied to the clipboard and you are told (you can change this in Settings). Hotkeys can be changed in **Settings**; if you also run another dictation tool, give the two apps different hotkeys.
 
+### Fine-tune on your own voice (in progress)
+Step 1 of 3 (record, then train, then evaluate). Record a dataset of your voice:
+```powershell
+.\.venv\Scripts\python.exe scripts\record_voice.py
+```
+1. Read the sentence shown, or say anything you normally dictate. Press **F5** to start and stop.
+2. The current model's transcript appears. Correct it until it matches **exactly** what you said. If you read the sentence word for word, click *I read the sentence above exactly*.
+3. Press **Save** (`Ctrl+S`).
+
+The sentences mix everyday dictation with your own past dictations. Aim for 30–60 minutes in total; you can stop and continue any time. The window shows how often the current model gets your words wrong; that number is the baseline the fine-tuned model has to beat. Clips are saved in `userdata\voice\`, which stays on your PC and out of git.
+
 ## Settings and data
 Everything VoiceType saves stays **inside its own folder**: settings, history, memory and the log in `userdata\`, speech models in `models\`. Both are excluded from git. (Settings has an *Open data folder* button). Audio is never saved. Details: [docs/privacy.md](docs/privacy.md).
 

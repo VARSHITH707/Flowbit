@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v2.1.0](#v210--2026-10-21) | 2026-10-21 | Fine-tuning step 1: record a dataset of my voice |
 | [v2.0.4](#v204--2026-10-21) | 2026-10-21 | Text export readable in Notepad, with original wording |
 | [v2.0.3](#v203--2026-10-21) | 2026-10-21 | CSV export includes the original wording |
 | [v2.0.2](#v202--2026-10-21) | 2026-10-21 | Everything stays in the project folder (nothing on C) |
@@ -12,6 +13,36 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v2.1.0 · 2026-10-21
+**Theme:** Fine-tune speech recognition on my own voice. This is step 1 of 3: record, then train, then evaluate.
+**Why:** I compared faster-whisper with openai/whisper and decided to keep faster-whisper. It uses about 1.2 GB of GPU memory against about 6 GB, which leaves room for the Smart-mode AI on an 8 GB GPU. The accuracy is the same, because both run the same models. The next improvement is a model fine-tuned on my voice.
+
+### Added
+- `scripts/record_voice.py`, a recording window.
+  - It shows a sentence to read, records (F5), and shows what the current model heard.
+  - I correct the text to exactly what I said, then save.
+  - It also shows how often the current model gets my words wrong. That is the baseline to beat.
+- `scripts/voice_prompts.txt`: 90 sentences. They are mixed with my own past dictations, so the dataset uses my real words.
+- `voicetype/voicedata.py`: saves each clip (16 kHz WAV plus the confirmed text in `dataset.jsonl`), deletes the last clip, and computes the word error rate.
+- Saved in `userdata\voice\`: on my PC only, excluded from git.
+
+### Changed
+- `docs/privacy.md` and the README explain that these training clips are saved on purpose. Normal dictation still never saves audio.
+
+### Tested
+- 111 tests pass (3 new: save and load, bad input rejected, word error rate).
+- Window smoke test, run hidden with a temporary folder:
+  - The model loads on the GPU.
+  - A test clip is transcribed exactly, saved, and counted.
+  - Pressing Save twice doesn't save twice, and undo deletes the clip.
+  - A 2-second recording from the real microphone is captured, and nothing is saved until Save is pressed.
+
+### Still open at v2.1.0
+- Step 2 (training) and step 3 (evaluation) are not built yet.
+- Training needs PyTorch, transformers and peft, plus the trainable version of `whisper-large-v3-turbo`: about 5 GB of downloads.
 
 ---
 

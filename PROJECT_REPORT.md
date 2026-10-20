@@ -5,7 +5,7 @@
 | Project | VoiceType, a private voice-typing app for Windows 11 (local replacement for Wispr Flow) |
 | Location | Everything in `Z:\Wispr Flow`: code, `userdata\` (history, settings, memory, log), `models\` (speech models). Nothing on C: |
 | Machine | Windows 11 laptop, RTX 4060 Laptop GPU (8 GB), Python 3.11 |
-| Current version | **v2.0.4** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
+| Current version | **v2.1.0** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
 | Repository | https://github.com/VARSHITH707/Unlimited-WisprFlow (public, MIT license) |
 | Status | Working on this machine; first hands-on test passed. Next: improve and fine-tune the models |
 | Last updated | 2026-10-21 |
@@ -44,6 +44,8 @@ Add one row each time something is built or changed. Newest at the bottom.
 | 2026-10-21 | — | `voicetype/__init__.py`, `config.py`, `models.py`, `pytest.ini`, `scripts/_projtmp.py`, `.gitignore` | Everything the project writes now stays in `Z:\Wispr Flow`: `userdata\` (history, settings, memory, log), `models\` (speech models), `.tmp\` (temporary files). All three are excluded from git. Shared programs (Python, Ollama) stay on C | 108 tests pass; offline check: 0 outside connections, models load from Z: |
 | 2026-10-21 | — | `voicetype/history.py` | CSV export now includes the original wording; exported my history to `userdata\history.csv` | 13 dictations exported |
 | 2026-10-21 | — | `voicetype/history.py` | Text export readable in Notepad (no Office on this PC): time to the second, plus the original wording | `userdata\history.txt`, 14 dictations |
+| 2026-10-21 | — | decision | Compared faster-whisper and openai/whisper. **Decision: keep faster-whisper** (same accuracy, about 4× faster, 1.2 GB vs about 6 GB of GPU memory, so it fits next to the Smart-mode AI) | Next: fine-tune on my voice |
+| 2026-10-21 | — | `scripts/record_voice.py`, `voicetype/voicedata.py`, `scripts/voice_prompts.txt` | Fine-tuning step 1: a recording window to build a dataset of my voice (90 sentences plus my own past dictations) | 111 tests pass; window tested with a real clip and the real mic |
 
 ## 3. What was delivered
 | Deliverable | Where |

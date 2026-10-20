@@ -1,0 +1,93 @@
+# Sentences for recording your voice dataset (scripts/record_voice.py). One per line; lines starting with # are ignored.
+# Edit freely: the more they look like what you really dictate, the better the fine-tuned model gets.
+Hi, my name is Varshith and I am building my own voice typing app.
+I pushed the latest changes to my GitHub repository this morning.
+Can you check whether the pull request passed all the tests?
+Let's schedule the review meeting for Tuesday at 3:30 in the afternoon.
+The model runs locally on my laptop, so nothing goes to the cloud.
+Please send me the report by Friday evening.
+I need to fine-tune the Whisper model on my own voice.
+Install the dependencies with pip and then run the tests with pytest.
+The GPU has 8 GB of VRAM, which is enough for both models.
+Ollama is running the Qwen model on localhost.
+Open the settings page and change the hotkey to Control Alt D.
+I'm working on an AI project with Python, PySide6 and faster-whisper.
+The repository is public, but only collaborators can push changes.
+Thanks for your help, I really appreciate it.
+Could you explain how reverse engineering works in simple words?
+The meeting has been moved from Monday to Wednesday.
+We should compare the accuracy before and after the fine-tuning.
+My phone number ends with four, five, six, seven.
+The build failed because of a missing DLL in the CUDA folder.
+Let me know when you are free to talk tomorrow.
+I want the app to correct grammar and spelling mistakes automatically.
+Kubernetes, Docker and Linux are on my list of things to learn this year.
+The price went up by 15 percent compared to last month.
+Write a short summary of the project for my manager.
+I have been testing the app for two days and it works well.
+Create a new branch, commit the changes and open a pull request.
+The history file should be stored inside the project folder on the Z drive.
+Please remind me to call my mother at 7 PM.
+This is the first version, so there might be a few bugs.
+The JSON file contains the settings, the hotkeys and the model name.
+I think we should use LoRA because it needs less memory.
+Can you make the text bigger and the buttons easier to click?
+It took about one and a half seconds to transcribe the sentence.
+Let's grab coffee after the standup meeting.
+The API returns an error when the token is missing.
+Download the model once and then everything works offline.
+I'll be working from home on Thursday and Friday.
+My email address is on the contact page of the website.
+The quick brown fox jumps over the lazy dog.
+Speech recognition is much better when the microphone is close to your mouth.
+Machine learning, deep learning and neural networks are related topics.
+We need to clean up the old files and archive the logs.
+The application starts in about two seconds.
+What is the difference between a process and a thread?
+Today I learned how to use the GitHub command line tool.
+Make sure the clipboard is restored after the text is pasted.
+The voice data stays on my computer and is never uploaded.
+I'm not sure that's right, could you double check it?
+Our team has five developers, two designers and one tester.
+The deadline is the 30th of November.
+Please add comments to the code so that it is easier to understand.
+The Wi-Fi in the office was very slow today.
+I'm going to restart my laptop and try again.
+Convert the model with CTranslate2 so faster-whisper can load it.
+The benchmark showed that the large model is more accurate.
+Can you translate this paragraph into Hindi?
+I usually code in Python, but I also know a bit of JavaScript and TypeScript.
+Turn off the notifications while I'm presenting.
+There are three steps: record, train and evaluate.
+Hello everyone, welcome to today's demo of VoiceType.
+I'll share the screen so that everyone can see the results.
+The error happens only when the window loses focus.
+My favourite food is biryani, and I also like dosa.
+Let's meet near the main gate at half past nine.
+The battery drains quickly when the GPU is busy.
+Scratch that, the meeting is actually on Thursday.
+Number one, open the laptop. Number two, start the app. Number three, speak.
+I prefer dark mode because it is easier on my eyes.
+Please don't share this document outside the team.
+The total comes to 2,450 rupees including tax.
+I asked Claude to write the tests before the code.
+Visual Studio Code is my favourite editor.
+Make a backup of the database before you change anything.
+The first epoch took about twelve minutes on the GPU.
+Can we postpone the call by thirty minutes?
+The new feature learns from my corrections and remembers names.
+Hyderabad, Bangalore and Chennai are big tech cities in India.
+I want this to work in WhatsApp, Gmail and Slack.
+The word error rate dropped from five percent to two percent.
+Please keep your answers short and to the point.
+Where did I save the presentation slides from last week?
+I'm really excited about this project.
+The training data should include the words I use every day.
+Run the app, hold the hotkey, speak, and release the key.
+Check the logs if something goes wrong.
+The internet is down, but the app still works offline.
+Machine translation has improved a lot in the last few years.
+Let me think about it and get back to you tomorrow.
+The file is too big to send by email, so I'll upload it to Drive.
+Can you summarise this article in three bullet points?
+Thank you for joining the call, have a great weekend.

@@ -5,7 +5,7 @@ Speech is turned into text **on this PC**. VoiceType has no account, no subscrip
 
 ## What happens to your voice
 1. The microphone is read **only while recording** (hold-to-talk, toggle, or the Start button).
-2. Audio is kept **in memory only**, handed to the local speech model, then discarded. It is **never written to disk** and never uploaded.
+2. Audio is kept **in memory only**, handed to the local speech model, then discarded. It is **never written to disk** and never uploaded. (The one exception is the separate voice-training recorder, which you start yourself; see the `voice\` row below.)
 3. The text is pasted into the window that was focused when you started recording (or copied to the clipboard; see below).
 
 ## What is stored on disk
@@ -18,6 +18,7 @@ All in `userdata\` inside the VoiceType folder (override with `VOICETYPE_HOME`).
 | `voicetype.log` | Start/stop messages and errors. **Never contains transcript text** (every log call was reviewed). Rotates at ~500 KB. | Delete the file |
 | `voicetype.lock` | Prevents two copies from running | Removed on exit |
 | `memory\learned.json` | Word fixes learned from your corrections (*heard* -> *written as*, how often, when) | Memory tab: Forget selected / Forget everything, or delete the folder |
+| `voice\clips\*.wav`, `voice\dataset.jsonl` | **Recordings of your voice**, saved on purpose to fine-tune the speech model, each with the text you confirmed. Only created by `scripts\record_voice.py`, only when you press Save; normal dictation never adds to it. Never uploaded | *Delete last saved clip* in the recorder, or delete the `voice` folder |
 | `memory\examples.json` | Up to 20 recent edits you made to AI-cleaned text (the cleaned sentence and what you changed it to). A few are shown to the local AI as examples of your style | Memory tab: Forget everything, or delete the file |
 
 Speech models live in `models\` inside the VoiceType folder (also excluded from git). Delete them from the Models tab.

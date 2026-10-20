@@ -166,3 +166,12 @@
   - Evidence: measured pastes land in ~15 ms (restore delay not the cause); 0/400 injected Ctrl lost into Tk; ROOT CAUSE of most Notepad misses: keyboard focus on a toolbar button -> new guard (copy + message), tested in real Notepad. Retry removed after it produced a duplicate; unconfirmed pastes reported ('copied'), verified in runs where they happened.
 - [x] 9.10 Full regression and docs
   - Evidence (final run): pytest 107/107; insertion 10/10; clipboard 9/9; hotkeys 8/8; Edge 7/7; recorder 8/8; UI 5/5; e2e 13/13; smart 6/6; e2e smart 8/8; auto-learn 9/9; offline 0 outside connections; bandit clean; size/nesting checks clean. Notepad 6/8 (one paste miss, detected and reported as designed). README, privacy, status, architecture, testing, cleanup-benchmark updated.
+
+## PHASE 10: Fine-tune speech recognition on the user's voice (decided 2026-10-21: keep faster-whisper)
+- [x] 10.1 Voice dataset recorder (scripts/record_voice.py, voicetype/voicedata.py, scripts/voice_prompts.txt)
+  - Evidence: tests/test_voicedata.py 3/3; hidden-window smoke test: model on cuda, test clip transcribed exactly, saved, counted, double-save guarded, undo; real mic 2 s captured, nothing saved before Save. Clips only in userdata\voice (gitignored).
+- [ ] 10.2 User records 30-60 min of their voice (needs the user)
+- [ ] 10.3 Training environment (separate venv inside the project; PyTorch + transformers + peft; HF whisper-large-v3-turbo weights) - needs download approval
+- [ ] 10.4 LoRA fine-tune script; fits 8 GB VRAM; held-out split by clip
+- [ ] 10.5 Merge + convert to CTranslate2 (int8_float16) into models\, selectable in Settings
+- [ ] 10.6 Evaluate: WER on held-out clips of the user's voice (baseline vs tuned) AND on the TTS reference clips (no regression); switch default only if better
