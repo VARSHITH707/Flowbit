@@ -69,6 +69,11 @@ class Dictation:
             self._set(PROCESSING)
         threading.Thread(target=self._work, args=(audio, gen, target), daemon=True, name="transcribe").start()
 
+    def level(self) -> float:
+        """Live microphone peak (0-1) while recording, else 0: drives the moving on-screen indicator."""
+        rec = self._rec
+        return getattr(rec, "level", 0.0) if rec is not None else 0.0
+
     def cancel(self) -> None:
         with self._lock:
             self._gen += 1

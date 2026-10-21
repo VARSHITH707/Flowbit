@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v2.2.0](#v220--2026-10-21) | 2026-10-21 | Moving logo while recording, dashboard, new README, fine-tuning scripts |
 | [v2.1.0](#v210--2026-10-21) | 2026-10-21 | Fine-tuning step 1: record a dataset of my voice |
 | [v2.0.4](#v204--2026-10-21) | 2026-10-21 | Text export readable in Notepad, with original wording |
 | [v2.0.3](#v203--2026-10-21) | 2026-10-21 | CSV export includes the original wording |
@@ -13,6 +14,39 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v2.2.0 · 2026-10-21
+**Theme:** Make it obvious when it's recording, show how well it works, and make the GitHub page easy to understand.
+**Why:** I couldn't tell when VoiceType was listening. I wanted a dashboard of the results, and a README anyone can follow.
+
+### Added
+- **Moving logo** (`voicetype/ui/pill.py`).
+  - The small bar at the bottom of the screen is now a logo of 5 sound bars.
+  - Idle: grey, small and still.
+  - Recording: red, and the bars bounce with the live microphone level (`Recorder.level`, `Dictation.level()`), plus a gentle wave so it moves even during pauses.
+  - Transcribing: amber wave. Done: green.
+  - It only animates while active (30 frames a second), so it costs nothing when idle.
+- **Dashboard** (`docs/DASHBOARD.md`).
+  - Charts (SVG, light and dark) of the speed fixes, the speech and cleanup model choices, and tests per version.
+  - Built from `docs/metrics.json` by `scripts/make_dashboard.py`.
+  - Every bar has its value and a tooltip, and every chart has a data table.
+- **New README**: short and plain, with an animated picture of the logo, a dashboard link and 3 references (Whisper, LoRA, faster-whisper). The old detailed README is now `docs/GUIDE.md`.
+- **Fine-tuning steps 2 and 3** (`scripts/train_voice.py`, `scripts/eval_voice.py`).
+  - LoRA training of whisper-large-v3-turbo, converted for faster-whisper into `models\my-voice`.
+  - A before/after comparison on held-out clips and reference clips.
+  - VoiceType lists `my-voice` once it exists.
+  - **Not yet verified end to end** (the training packages were still downloading).
+- Base model `openai/whisper-large-v3-turbo` (pinned version `41f01f3`) downloaded to `models\`. A separate `.venv-train\` is excluded from git.
+
+### Tested
+- 117 automated tests pass. New tests cover: the logo stays still when idle and moves while recording, louder means taller bars, the animation runs only while active, the live mic level, and the trained-model handling.
+- Real-desktop UI check 5/5: the logo shows in all states, never takes focus, and typing still reaches the app underneath.
+- The charts were rendered and checked with real fonts.
+
+### Still open at v2.2.0
+- Run the training pipeline end to end, then train on real recordings of my voice.
 
 ---
 

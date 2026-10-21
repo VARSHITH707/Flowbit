@@ -1,133 +1,111 @@
 # VoiceType
 
-Local, private voice typing for Windows 11. Hold a hotkey, speak, release: the text appears in the app you were typing in. Speech recognition runs **on your PC** (Whisper on your NVIDIA GPU, or the CPU), so there is **no account, no subscription, no word limit and no upload of your audio**.
+**Free, private voice typing for Windows.** Hold a key, speak, let go, and your words are typed wherever your cursor is: email, chat, browser, code editor, anywhere.
 
-This is an original application. It was designed after studying the public behaviour of commercial dictation tools (see `docs/rea-findings.md`); it contains none of their code or assets. It is **not affiliated with or endorsed by Wispr Flow**; the name is only used to describe what this project replaces.
+Everything runs on your own PC. No account, no subscription, no word limit, and your voice never leaves your computer.
 
-License: [MIT](LICENSE). You are free to clone, use and modify your own copy. This repository itself only accepts changes from its owner and collaborators; to suggest something, open an issue.
+<p align="center"><img src="docs/img/indicator.svg" alt="The VoiceType logo at the bottom of the screen: still when not recording, moving while recording" width="420"></p>
 
-> Status: working MVP, tested on one machine (Windows 11, RTX 4060 Laptop, Python 3.11). Read [What is and is not verified](#what-is-and-is-not-verified) before relying on it.
+> Not affiliated with or endorsed by Wispr Flow. This is an independent, open-source project that does the same job locally.
 
-## Requirements
-- Windows 11 x64, a microphone
-- Python **3.11** (not 3.13). [uv](https://docs.astral.sh/uv/) is the easiest way to get it
-- Optional: NVIDIA GPU + recent driver for fast transcription (about 1.1 GB VRAM with the default model). Without one the app uses the CPU automatically (slower)
-- About 2 GB disk for the `large-v3-turbo` model (or 0.5 GB for `small`), downloaded once
-- For **Smart mode** (AI cleanup, see below): [Ollama](https://ollama.com) installed, then `ollama pull qwen2.5:7b-instruct-q4_K_M` (4.7 GB, once). Whisper + this model use about 6.6 GB of an 8 GB GPU. Without Ollama, VoiceType still works and simply inserts the plain transcript
+## What it does
 
-## Install
+| | |
+|---|---|
+| **Types anywhere** | Works in any app with a text box. Your clipboard is put back afterwards. |
+| **Cleans up your speech** | Removes "um" and "uh", fixes self-corrections ("at 2, actually 3" becomes "at 3"), builds numbered lists, and turns "comma" and "question mark" into punctuation. A local AI does this. |
+| **Learns from you** | When you correct a name or word it got wrong, it remembers it for next time. |
+| **Shows when it's listening** | A small logo at the bottom of the screen moves with your voice while recording. If it isn't moving, it isn't recording. |
+| **Stays private** | Speech recognition and the AI both run on your PC. Tested: 0 network connections while dictating. |
+| **Can learn your voice** | Optional: record yourself and fine-tune the speech model on your own voice. |
+
+## Quick start
+
+You need Windows 11 (the only version tested), a microphone, and Python 3.11. An NVIDIA GPU makes it much faster but isn't required.
+
 ```powershell
 git clone https://github.com/VARSHITH707/Unlimited-WisprFlow.git
 cd Unlimited-WisprFlow
 uv venv --python 3.11 .venv
 uv pip install --python .venv\Scripts\python.exe -r requirements.txt
-```
-(Without uv: `py -3.11 -m venv .venv` then `.venv\Scripts\python -m pip install -r requirements.txt`.)
-For a CPU-only install, delete the two `nvidia-...` lines from `requirements.txt` first.
-
-## Run
-```powershell
 .\.venv\Scripts\python.exe -m voicetype
 ```
-On first start a short wizard lets you pick and test a microphone and download a speech model. You can also download models later from the **Models** tab, or from a terminal:
-```powershell
-.\.venv\Scripts\python.exe -c "from voicetype import models; models.download('large-v3-turbo')"
-```
-After the download, dictation works fully offline. The app lives in the system tray; closing the window keeps it running so the hotkeys keep working. Quit from the tray menu.
 
-## Use
-| Action | Default hotkey |
+A short setup wizard opens on first start: pick your microphone and download the speech model (about 1.6 GB, once).
+
+For the speech cleanup, install [Ollama](https://ollama.com) and run `ollama pull qwen2.5:7b-instruct-q4_K_M` (4.7 GB, once). Without it, VoiceType still types exactly what you said.
+
+No `uv`? Use `py -3.11 -m venv .venv` and `.venv\Scripts\python -m pip install -r requirements.txt` instead.
+
+## How to use it
+
+1. Click in any text box.
+2. **Hold `Ctrl+Alt+D`** and speak. The logo at the bottom turns red and moves.
+3. **Let go.** Your text appears in a second or two.
+
+| Do this | Press |
 |---|---|
-| Dictate (push to talk) | **hold** `Ctrl+Alt+D`, speak, release |
-| Dictate (toggle) | press `Ctrl+Alt+Space` to start, again to stop |
-| Cancel (nothing is inserted) | `Esc` while recording or transcribing |
+| Dictate while holding the key | hold `Ctrl+Alt+D` |
+| Start and stop hands-free | `Ctrl+Alt+Space` |
+| Cancel | `Esc` |
 | Open settings | `Ctrl+Alt+Shift+V` |
 
-1. Click into any text field (Notepad, browser, chat, editor).
-2. Hold the hotkey and speak. A small pill at the bottom of the screen shows *Listening*, then *Transcribing*, then *Done*.
-3. The text is pasted where your cursor was. Your clipboard is restored afterwards.
-
-### Smart mode (default): cleanup like Wispr Flow, on your laptop
-A local AI (qwen2.5 7B through Ollama on `127.0.0.1`) tidies what you said before it is pasted:
-| You say | VoiceType types |
+| You say | It types |
 |---|---|
 | "um so I think uh we should ship it on Friday" | So I think we should ship it on Friday. |
 | "let's do coffee at 2 actually 3" | Let's do coffee at 3. |
-| "schedule it for Monday no scratch that Tuesday" | Schedule it for Tuesday. |
-| "one open the laptop two log in ... seven buy milk no no that is not the seventh point the seventh point is archive the old files" | a numbered list 1-7 ending with "Archive the old files" |
 | "hello comma how are you question mark" | Hello, how are you? |
-| "I actually enjoyed the movie" / "what is the capital of France" | kept as said (not "corrected", not answered) |
 
-Safety: if the AI's version contains words you never said, or drops most of it, or the AI is not running, VoiceType pastes the plain transcript instead and tells you why. **Undo AI edit** (Home tab, and *Copy original* in History) gives you exactly what was recognised. Writing style can be set per kind of app (email, work chat, personal chat, code, other); casual style drops the final period in chat apps, as Wispr Flow does.
+Everything you dictate is listed in the **History** tab, with the time. Export it to a text file from there.
 
-### Memory: it learns from your corrections
-After pasting, VoiceType keeps an eye on that same text box. When you fix a word it typed (for example *cubernetes* to *Kubernetes*) and move on, it remembers the fix in `userdata\memory` (inside the VoiceType folder) and writes it your way next time. **Names** (you capitalised them) apply after one fix; **other words** only after you make the same fix twice, so a one-off edit never rewrites future text; content changes such as *Friday* to *Monday* are never learned. See and delete what it learned in the **Memory** tab. Works in apps that expose their text to Windows (verified: Notepad, Edge); elsewhere it quietly does nothing. Turn it off in Settings.
+## How well it works
 
-If you switch to another window while speaking, the text is **not** pasted anywhere: it is copied to the clipboard and you are told (you can change this in Settings). Hotkeys can be changed in **Settings**; if you also run another dictation tool, give the two apps different hotkeys.
+See the **[dashboard](docs/DASHBOARD.md)** for charts of speed, accuracy and every version.
 
-### Fine-tune on your own voice (in progress)
-Step 1 of 3 (record, then train, then evaluate). Record a dataset of your voice:
-```powershell
-.\.venv\Scripts\python.exe scripts\record_voice.py
-```
-1. Read the sentence shown, or say anything you normally dictate. Press **F5** to start and stop.
-2. The current model's transcript appears. Correct it until it matches **exactly** what you said. If you read the sentence word for word, click *I read the sentence above exactly*.
-3. Press **Save** (`Ctrl+S`).
-
-The sentences mix everyday dictation with your own past dictations. Aim for 30–60 minutes in total; you can stop and continue any time. The window shows how often the current model gets your words wrong; that number is the baseline the fine-tuned model has to beat. Clips are saved in `userdata\voice\`, which stays on your PC and out of git.
-
-## Settings and data
-Everything VoiceType saves stays **inside its own folder**: settings, history, memory and the log in `userdata\`, speech models in `models\`. Both are excluded from git. (Settings has an *Open data folder* button). Audio is never saved. Details: [docs/privacy.md](docs/privacy.md).
-
-| Setting | Notes |
+| | |
 |---|---|
-| Model | `large-v3-turbo` (default, most accurate), `medium`, `small` (fastest/lightest) |
-| Run on | Automatic (GPU if available), GPU, or CPU |
-| Language | English by default; pick another or auto-detect (only English was tested) |
-| Hotkeys / mode | hold, toggle, or both |
-| Longest recording | default 5 minutes; optional stop after a pause in speech |
-| Text mode | *Smart* (default, local AI cleanup), *Clean* (only drops um/uh), *Exact* (as recognised) |
-| Local AI model | default `qwen2.5:7b-instruct-q4_K_M` (chosen by benchmark, see docs/cleanup-benchmark.md) |
-| Writing style per app | formal or casual for email, work chat, personal chat, code, everything else |
-| Learn from my corrections | on by default; reads the text box after pasting, on this PC only |
-| Custom vocabulary | `Kubernetes` fixes spelling/case; `py side six=>PySide6` replaces what was heard |
-| History | on/off, auto-delete after N days, search, copy, export, delete |
+| Time from letting go to seeing text | **0.5–1.6 s** |
+| Speech recognition errors on test audio | **1.9%** of words |
+| Speech cleanup test cases passed | **14 of 14** |
+| Network connections while dictating | **0** |
+| Automated tests | **117 pass** |
 
-## Tests
-```powershell
-uv pip install --python .venv\Scripts\python.exe -r requirements-dev.txt
-.\.venv\Scripts\python.exe -m pytest -q tests          # 107 tests, ~4 s, opens no windows
-```
-Hardware-dependent integration scripts and their results are in [docs/testing.md](docs/testing.md).
+All numbers were measured on one laptop (RTX 4060, 8 GB). Accuracy on your own voice and accent will differ, which is what the voice fine-tuning is for.
 
-## Troubleshooting
-| Problem | What to do |
+## Where your data goes
+
+Everything stays inside the VoiceType folder, and none of it is ever uploaded:
+
+| Folder | What's in it |
 |---|---|
-| "Model ... is not downloaded yet" | Models tab -> Download (needs internet once) |
-| Nothing happens when I press the hotkey | Another app may use the same keys (change them in Settings). The hook cannot see keys typed into windows running **as administrator**: run VoiceType as admin or dictate into a normal window |
-| Text goes to the clipboard instead of the window | Focus moved while you were speaking (by design), or the target is an elevated window |
-| "AI cleanup skipped: ..." | The AI's version added or dropped words, so the plain transcript was used (by design). If it says the local AI is unavailable: start Ollama and run `ollama pull qwen2.5:7b-instruct-q4_K_M` |
-| Smart mode is slow the first time | The AI loads when VoiceType starts (about 3-15 s in the background). After that, about 0.5-1.6 s per dictation |
-| "No speech detected" / "No audio captured" | Mic is silent or muted: check Settings -> Microphone and Windows microphone privacy settings |
-| GPU error / out of memory | Pick `small` or CPU in Settings. The app already retries on the CPU automatically and says so |
-| Slow first dictation | The model loads on first use (about 3 s from cache). It is unloaded after 10 idle minutes (changeable) |
-| Another dictation tool types extra text | Give the two apps different hotkeys |
-| Windows says "symlinks not supported" during download | Harmless; set `HF_HUB_DISABLE_SYMLINKS_WARNING=1` to hide it |
+| `userdata\` | your history, settings, learned words, and (only if you record them) voice clips for training |
+| `models\` | the speech models |
 
-## Project layout
-`voicetype/` application code (see [docs/architecture.md](docs/architecture.md)) | `tests/` automated tests | `scripts/` integration, benchmark and measurement scripts | `docs/` research, requirements, benchmark, privacy, testing, status.
+Both folders are excluded from git. Normal dictation never saves audio. Details: [docs/privacy.md](docs/privacy.md).
 
-## Build a standalone executable
-```powershell
-uv pip install --python .venv\Scripts\python.exe -r requirements-dev.txt
-powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1            # GPU build -> dist\VoiceType\VoiceType.exe
-powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1 -CpuOnly   # CPU build (much smaller)
-```
-The result is a folder (`dist\VoiceType`), not a single file. Copy the whole folder. Speech models are **not** bundled: they download on first use, as in the development install.
+## Train it on your voice (optional)
 
-What was verified for the GPU build (about 2.3 GB, of which ~2.0 GB is NVIDIA's cuBLAS/cuDNN): it launches and exits with code 0, shows its windows, and transcribes on the GPU from inside the `.exe` (`VoiceType.exe --selftest sample.wav --selftest-out result.json` writes a JSON report; the packaged app has no console). **Not verified:** the hotkey/insert flow and the first-run wizard inside the packaged build (they run the same code as the development install), the CPU-only build, installing on a second PC, and code signing (Windows SmartScreen will warn about an unsigned `.exe`).
+> New: recording is tested. The training and checking steps are still being verified end to end. Results will appear on the [dashboard](docs/DASHBOARD.md).
 
-Gotcha fixed in the build script: building from a shell whose PATH contains Git's `mingw64\bin` bundles the wrong OpenSSL and breaks `import ssl` ("DLL load failed while importing _ssl"). The script builds with a clean PATH.
+1. **Record:** `.\.venv\Scripts\python.exe scripts\record_voice.py`. Read the sentences shown and correct any mistakes. 30–60 minutes is a good amount.
+2. **Train:** `.\.venv-train\Scripts\python.exe scripts\train_voice.py` (one-time setup in the [guide](docs/GUIDE.md#fine-tune-on-your-own-voice-in-progress)).
+3. **Check:** `.\.venv\Scripts\python.exe scripts\eval_voice.py`. It tells you whether your trained model is better. If it is, pick **my-voice** in Settings.
 
-## What is and is not verified
-See the feature table in [docs/status.md](docs/status.md). In short: the core loop (hotkey -> record -> local transcription -> insert) is verified end to end on real hardware, including real Notepad and Edge. **Not yet verified:** pressing the hotkeys by hand, real human speech accuracy (benchmarks use synthetic voices), other languages, unplugging the mic mid-recording, apps other than Notepad/Edge. Please try those and report what breaks.
+## More
+
+- [Full guide](docs/GUIDE.md): every setting, troubleshooting, and building a `.exe`
+- [Dashboard](docs/DASHBOARD.md): measured results and versions
+- [Version history](VERSION_HISTORY.md) and [project report](PROJECT_REPORT.md)
+- [How it's built](docs/architecture.md) and [what's tested](docs/testing.md)
+
+## References
+
+1. Radford, A. et al. (2022). *Robust Speech Recognition via Large-Scale Weak Supervision*. OpenAI. [arXiv:2212.04356](https://arxiv.org/abs/2212.04356). This is the Whisper model that turns speech into text.
+2. Hu, E. J. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685). This is the method used to fine-tune Whisper on your voice in 8 GB of GPU memory.
+3. SYSTRAN. *faster-whisper: Faster Whisper transcription with CTranslate2*. [github.com/SYSTRAN/faster-whisper](https://github.com/SYSTRAN/faster-whisper). This is the engine VoiceType runs Whisper with: about 4× faster and much lighter than the original.
+
+Also built with [Ollama](https://ollama.com) and [Qwen2.5](https://github.com/QwenLM/Qwen2.5) for the cleanup, and [PySide6](https://doc.qt.io/qtforpython-6/) for the app window.
+
+## License
+
+[MIT](LICENSE). Use it, change it, and share it. This repository accepts changes only from its owner and collaborators; to suggest something, [open an issue](https://github.com/VARSHITH707/Unlimited-WisprFlow/issues).

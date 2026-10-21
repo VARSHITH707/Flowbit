@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="198" viewBox="0 0 760 198" role="img" aria-label="Local cleanup AI: test cases passed (of 14, higher is better)">
+<style>
+.s{fill:#fcfcfb}.t1{fill:#0b0b0b}.t2{fill:#52514e}.g{stroke:#e4e3df}.a{fill:#2a78d6}.b{fill:#85837d}
+@media (prefers-color-scheme:dark){.s{fill:#1a1a19}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.g{stroke:#3a3936}.a{fill:#3987e5}.b{fill:#6b6a66}}
+text{font-family:Segoe UI,Helvetica,Arial,sans-serif}
+</style>
+<rect class="s" width="760" height="198" rx="10"/>
+<text class="t1" x="18" y="28" font-size="15" font-weight="600">Local cleanup AI: test cases passed (of 14, higher is better)</text>
+<line class="g" x1="230" y1="38" x2="230" y2="184" stroke-width="1"/>
+<text class="t1" x="220" y="56" font-size="13" text-anchor="end">qwen2.5:7b-instruct  (chosen)</text>
+<path class="a" d="M230.0,44.0 h418.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-418.0 z"><title>qwen2.5:7b-instruct: 14, 0.33 s median</title></path>
+<text class="t2" x="658.0" y="55" font-size="12">14</text>
+<text class="t1" x="220" y="90" font-size="13" text-anchor="end">phi3 3.8B</text>
+<path class="b" d="M230.0,78.0 h327.6 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-327.6 z"><title>phi3 3.8B: 11, 0.17 s median</title></path>
+<text class="t2" x="567.5714285714286" y="89" font-size="12">11</text>
+<text class="t1" x="220" y="124" font-size="13" text-anchor="end">llama3.2:3b</text>
+<path class="b" d="M230.0,112.0 h297.4 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-297.4 z"><title>llama3.2:3b: 10, 0.24 s median</title></path>
+<text class="t2" x="537.4285714285714" y="123" font-size="12">10</text>
+<text class="t1" x="220" y="158" font-size="13" text-anchor="end">qwen3:4b</text>
+<path class="b" d="M230.0,146.0 h1.0 a1.0,1.0 0 0 1 1.0,1.0 v12.0 a1.0,1.0 0 0 1 -1.0,1.0 h-1.0 z"><title>qwen3:4b: 0, thinking-only build</title></path>
+<text class="t2" x="238" y="157" font-size="12">0</text>
+</svg>

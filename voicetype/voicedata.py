@@ -11,9 +11,9 @@ from pathlib import Path
 
 import numpy as np
 
-from .audio import SAMPLE_RATE
 from .config import data_dir
 
+SAMPLE_RATE = 16000  # Whisper's rate (= audio.SAMPLE_RATE); not imported so training can run without sounddevice
 MIN_SECONDS, MAX_SECONDS = 0.5, 28  # Whisper trains on 30-second windows
 
 

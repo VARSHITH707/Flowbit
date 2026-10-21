@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="188" viewBox="0 0 760 188" role="img" aria-label="Speed fixes: before vs after (seconds, lower is better)">
+<style>
+.s{fill:#fcfcfb}.t1{fill:#0b0b0b}.t2{fill:#52514e}.g{stroke:#e4e3df}.a{fill:#2a78d6}.b{fill:#85837d}
+@media (prefers-color-scheme:dark){.s{fill:#1a1a19}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.g{stroke:#3a3936}.a{fill:#3987e5}.b{fill:#6b6a66}}
+text{font-family:Segoe UI,Helvetica,Arial,sans-serif}
+</style>
+<rect class="s" width="760" height="188" rx="10"/>
+<text class="t1" x="18" y="28" font-size="15" font-weight="600">Speed fixes: before vs after (seconds, lower is better)</text>
+<rect class="b" x="18" y="42" width="12" height="12" rx="2"/><text class="t2" x="36" y="52" font-size="12">before the fix</text>
+<rect class="a" x="142" y="42" width="12" height="12" rx="2"/><text class="t2" x="160" y="52" font-size="12">after the fix</text>
+<line class="g" x1="230" y1="60" x2="230" y2="174" stroke-width="1"/>
+<text class="t1" x="220" y="78" font-size="13" text-anchor="end">First AI cleanup after start</text>
+<path class="b" d="M230.0,66.0 h418.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-418.0 z"><title>before: 15.6 s</title></path>
+<text class="t2" x="658.0" y="77" font-size="12">15.6s</text>
+<path class="a" d="M230.0,84.0 h22.5 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-22.5 z"><title>after: 0.98 s (v2.0)</title></path>
+<text class="t2" x="262.51025641025643" y="95" font-size="12">0.98s</text>
+<text class="t1" x="220" y="130" font-size="13" text-anchor="end">First dictation after start</text>
+<path class="b" d="M230.0,118.0 h134.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-134.0 z"><title>before: 5.1 s</title></path>
+<text class="t2" x="373.96153846153845" y="129" font-size="12">5.1s</text>
+<path class="a" d="M230.0,136.0 h66.3 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-66.3 z"><title>after: 2.6 s (v2.0)</title></path>
+<text class="t2" x="306.33333333333337" y="147" font-size="12">2.6s</text>
+</svg>

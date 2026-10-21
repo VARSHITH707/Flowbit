@@ -1,0 +1,143 @@
+{
+  "_note": "Measured numbers only (each has a source). Edit this file, then run: .venv\\Scripts\\python.exe scripts\\make_dashboard.py",
+  "machine": "Windows 11, RTX 4060 Laptop GPU (8 GB), Python 3.11",
+  "tiles": [
+    {
+      "value": "0",
+      "label": "network connections while dictating",
+      "source": "scripts/check_offline.py"
+    },
+    {
+      "value": "0.5-1.6 s",
+      "label": "from releasing the key to text on screen",
+      "source": "docs/testing.md"
+    },
+    {
+      "value": "1.9%",
+      "label": "word error rate, speech model (test audio)",
+      "source": "docs/benchmark.md"
+    },
+    {
+      "value": "14 / 14",
+      "label": "cleanup cases passed by the local AI",
+      "source": "docs/cleanup-benchmark.md"
+    },
+    {
+      "value": "6.6 / 8 GB",
+      "label": "GPU memory, speech + AI together",
+      "source": "docs/cleanup-benchmark.md"
+    }
+  ],
+  "speedups": {
+    "title": "Speed fixes: before vs after (seconds, lower is better)",
+    "unit": "s",
+    "rows": [
+      {
+        "label": "First AI cleanup after start",
+        "before": 15.6,
+        "after": 0.98,
+        "version": "v2.0"
+      },
+      {
+        "label": "First dictation after start",
+        "before": 5.1,
+        "after": 2.6,
+        "version": "v2.0"
+      }
+    ]
+  },
+  "speech_models": {
+    "title": "Speech models: word error rate on a 5.7-minute test clip (%, lower is better)",
+    "unit": "%",
+    "chosen": "large-v3-turbo",
+    "rows": [
+      {
+        "label": "small",
+        "value": 5.8,
+        "extra": "8.3 s, ~0.4 GB GPU"
+      },
+      {
+        "label": "medium",
+        "value": 1.9,
+        "extra": "17.9 s, ~1.1 GB GPU"
+      },
+      {
+        "label": "large-v3-turbo",
+        "value": 1.9,
+        "extra": "8.4 s, ~1.2 GB GPU"
+      }
+    ]
+  },
+  "cleanup_models": {
+    "title": "Local cleanup AI: test cases passed (of 14, higher is better)",
+    "unit": "",
+    "chosen": "qwen2.5:7b-instruct",
+    "rows": [
+      {
+        "label": "qwen2.5:7b-instruct",
+        "value": 14,
+        "extra": "0.33 s median"
+      },
+      {
+        "label": "phi3 3.8B",
+        "value": 11,
+        "extra": "0.17 s median"
+      },
+      {
+        "label": "llama3.2:3b",
+        "value": 10,
+        "extra": "0.24 s median"
+      },
+      {
+        "label": "qwen3:4b",
+        "value": 0,
+        "extra": "thinking-only build"
+      }
+    ]
+  },
+  "versions": [
+    {
+      "version": "v1.0",
+      "date": "2026-10-20",
+      "tests": 54,
+      "what": "Local dictation into any app: hotkeys, Whisper on the GPU, tray app, history"
+    },
+    {
+      "version": "v2.0",
+      "date": "2026-10-20",
+      "tests": 107,
+      "what": "Smart cleanup with a local AI, memory that learns from corrections, styles per app"
+    },
+    {
+      "version": "v2.0.1",
+      "date": "2026-10-21",
+      "tests": 107,
+      "what": "Published on GitHub, MIT license"
+    },
+    {
+      "version": "v2.0.2",
+      "date": "2026-10-21",
+      "tests": 108,
+      "what": "Everything stored inside the project folder"
+    },
+    {
+      "version": "v2.0.4",
+      "date": "2026-10-21",
+      "tests": 108,
+      "what": "History readable in Notepad, with original wording"
+    },
+    {
+      "version": "v2.1.0",
+      "date": "2026-10-21",
+      "tests": 111,
+      "what": "Voice recorder for fine-tuning"
+    },
+    {
+      "version": "v2.2.0",
+      "date": "2026-10-21",
+      "tests": 117,
+      "what": "Moving logo while recording; fine-tuning pipeline; dashboard"
+    }
+  ],
+  "finetune": null
+}

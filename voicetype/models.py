@@ -11,7 +11,8 @@ from faster_whisper.utils import _MODELS  # size -> HF repo id
 
 from .config import MODELS_DIR
 
-MODELS = {"small": "~0.5 GB", "medium": "~1.5 GB", "large-v3-turbo": "~1.6 GB"}
+CUSTOM = {"my-voice": "fine-tuned on your voice: made by scripts\\train_voice.py"}  # built on this PC, never downloaded
+MODELS = {"small": "~0.5 GB", "medium": "~1.5 GB", "large-v3-turbo": "~1.6 GB", **CUSTOM}
 DEFAULT_MODEL = "large-v3-turbo"
 REVISIONS = {  # the commits that were benchmarked (docs/benchmark.md)
     "small": "536b0662742c02347bc0e980a01041f333bce120",
@@ -29,7 +30,11 @@ def _fetch(model: str, **kw) -> str:
 
 
 def local_path(model: str) -> Path:
-    """Folder of the downloaded, pinned model. Raises if it is not on disk."""
+    """Folder of the downloaded, pinned model (or your trained one). Raises if it is not on disk."""
+    if model in CUSTOM:
+        if not (MODELS_DIR / model / "model.bin").exists():
+            raise FileNotFoundError(f"{model} has not been trained yet")
+        return MODELS_DIR / model
     return Path(_fetch(model, local_files_only=True))
 
 
@@ -50,6 +55,9 @@ def model_ref(model: str) -> str:
 
 def download(model: str, on_progress=None) -> str:
     """Download `model`; on_progress(done_bytes, total_bytes) called as files arrive."""
+    if model in CUSTOM:
+        raise ValueError(f"{model} is not downloaded: record your voice (scripts\\record_voice.py), then train it "
+                         "(scripts\\train_voice.py).")
     from tqdm.auto import tqdm
 
     class _Bar(tqdm):
@@ -69,6 +77,9 @@ def delete(model: str) -> bool:
         snap = local_path(model)  # .../models--org--name/snapshots/<rev>
     except Exception:
         return False
+    if model in CUSTOM:
+        shutil.rmtree(snap)  # MODELS_DIR / model, nothing else
+        return True
     root = snap.parents[1]
     if root.name != "models--" + _MODELS[model].replace("/", "--"):
         raise ValueError(f"Refusing to delete unexpected path {root}")

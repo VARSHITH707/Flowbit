@@ -19,11 +19,27 @@ def test_save_load_roundtrip_and_delete_last():
     assert [e["text"] for e in vd.load()] == ["Hello world"]
 
 
+def test_sample_rate_matches_the_recorder():
+    assert vd.SAMPLE_RATE == SAMPLE_RATE
+
+
 def test_save_rejects_empty_text_and_bad_lengths():
     for audio, text in ((tone(2), "  "), (tone(0.2), "too short"), (tone(29), "too long")):
         with pytest.raises(ValueError):
             vd.save(audio, text)
     assert vd.load() == []
+
+
+def test_trained_model_is_found_only_once_built_and_never_downloaded(tmp_path, monkeypatch):
+    from voicetype import models
+    monkeypatch.setattr(models, "MODELS_DIR", tmp_path)
+    assert "my-voice" in models.MODELS and not models.is_available("my-voice")
+    with pytest.raises(ValueError):
+        models.download("my-voice")
+    (tmp_path / "my-voice").mkdir()
+    (tmp_path / "my-voice" / "model.bin").write_bytes(b"x")
+    assert models.is_available("my-voice") and models.model_ref("my-voice") == str(tmp_path / "my-voice")
+    assert models.delete("my-voice") and not (tmp_path / "my-voice").exists() and tmp_path.exists()
 
 
 def test_word_error_rate_ignores_case_and_punctuation():

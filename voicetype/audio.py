@@ -33,6 +33,7 @@ class Recorder:
         self._n = 0
         self._stream = None
         self._limit_hit = False
+        self.level = 0.0  # peak of the latest audio block (0-1), for the on-screen indicator
         self._lock = threading.Lock()
 
     @property
@@ -53,6 +54,7 @@ class Recorder:
             raise MicError(f"Microphone unavailable: {e}") from e
 
     def _cb(self, indata, frames, time_info, status):
+        self.level = float(np.abs(indata).max())
         with self._lock:
             self._chunks.append(indata[:, 0].copy())
             self._n += frames
@@ -72,7 +74,7 @@ class Recorder:
             threading.Thread(target=self.on_limit, daemon=True).start()
 
     def _close(self) -> None:
-        s, self._stream = self._stream, None
+        s, self._stream, self.level = self._stream, None, 0.0
         if s is not None:
             try:
                 s.stop()

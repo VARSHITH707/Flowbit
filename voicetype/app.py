@@ -74,6 +74,7 @@ class App:
         self._warm_model = None
         self.window = MainWindow(self.holder, self.history, self.transcriber)
         self.pill = StatePill()
+        self.pill.level_source = self.dictation.level  # the logo's bars follow the live mic level
         self.hotkeys: Hotkeys | None = None
         self._build_tray()
         self._connect()

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="164" viewBox="0 0 760 164" role="img" aria-label="Speech models: word error rate on a 5.7-minute test clip (%, lower is better)">
+<style>
+.s{fill:#fcfcfb}.t1{fill:#0b0b0b}.t2{fill:#52514e}.g{stroke:#e4e3df}.a{fill:#2a78d6}.b{fill:#85837d}
+@media (prefers-color-scheme:dark){.s{fill:#1a1a19}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.g{stroke:#3a3936}.a{fill:#3987e5}.b{fill:#6b6a66}}
+text{font-family:Segoe UI,Helvetica,Arial,sans-serif}
+</style>
+<rect class="s" width="760" height="164" rx="10"/>
+<text class="t1" x="18" y="28" font-size="15" font-weight="600">Speech models: word error rate on a 5.7-minute test clip (%, lower is better)</text>
+<line class="g" x1="230" y1="38" x2="230" y2="150" stroke-width="1"/>
+<text class="t1" x="220" y="56" font-size="13" text-anchor="end">small</text>
+<path class="b" d="M230.0,44.0 h418.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-418.0 z"><title>small: 5.8%, 8.3 s, ~0.4 GB GPU</title></path>
+<text class="t2" x="658.0" y="55" font-size="12">5.8%</text>
+<text class="t1" x="220" y="90" font-size="13" text-anchor="end">medium</text>
+<path class="b" d="M230.0,78.0 h134.2 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-134.2 z"><title>medium: 1.9%, 17.9 s, ~1.1 GB GPU</title></path>
+<text class="t2" x="374.2413793103448" y="89" font-size="12">1.9%</text>
+<text class="t1" x="220" y="124" font-size="13" text-anchor="end">large-v3-turbo  (chosen)</text>
+<path class="a" d="M230.0,112.0 h134.2 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-134.2 z"><title>large-v3-turbo: 1.9%, 8.4 s, ~1.2 GB GPU</title></path>
+<text class="t2" x="374.2413793103448" y="123" font-size="12">1.9%</text>
+</svg>

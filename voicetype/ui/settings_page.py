@@ -38,7 +38,7 @@ class SettingsPage(QWidget):
         self.h = cfg_holder
         c = cfg_holder.cfg
         self.theme = combo([(k, k.capitalize()) for k in CHOICES["theme"]], c.theme)
-        self.idle_pill = QCheckBox("Show the small status pill when idle")
+        self.idle_pill = QCheckBox("Show the small logo at the bottom of the screen when idle (it moves while recording)")
         self.idle_pill.setChecked(c.show_idle_pill)
         self.mic = combo([(None, "System default")] + [(i, n) for i, n in list_inputs()], c.mic)
         self.model = combo([(m, f"{m}  ({s})") for m, s in models.MODELS.items()], c.model)
