@@ -55,9 +55,15 @@ Measured on one machine: Windows 11, RTX 4060 Laptop GPU (8 GB), Python 3.11. Ev
 | v2.0.4 | 2026-10-21 | 108 | History readable in Notepad, with original wording |
 | v2.1.0 | 2026-10-21 | 111 | Voice recorder for fine-tuning |
 | v2.2.0 | 2026-10-21 | 117 | Moving logo while recording; fine-tuning pipeline; dashboard |
+| v2.2.1 | 2026-10-21 | 117 | Fine-tuning pipeline verified end to end (train, convert, compare) |
 
 Full details: [VERSION_HISTORY.md](../VERSION_HISTORY.md).
 
 ## Fine-tuning on your own voice
 
-Not measured yet: waiting for voice recordings (`scripts/record_voice.py`).
+| Test set | Clips | Base | Fine-tuned |
+|---|---|---|---|
+| held-out test clip (synthetic voice) | 1 | 0.0% | 0.0% |
+| reference English | 1 | 0.0% | 0.0% |
+
+**Pipeline test only, not your voice yet.** On 2026-10-21 the full fine-tuning pipeline (train, then merge, then convert, then compare) ran end to end on 12 synthetic test clips: 8 training steps in 1.0 min, peak GPU memory 2.1 GB, 13.1 M trainable parameters (1.6% of the model, LoRA rank 32). The trained model loaded in VoiceType's real engine with the same speed as the base model (0.28 s vs 0.27 s per clip) and no loss of accuracy on reference English. Both scored 0% errors because the test clips were synthetic speech labelled by the base model itself, so there was nothing to improve; the verdict was correctly NOT BETTER. The real comparison needs 30-60 minutes of your own recordings (`scripts/record_voice.py`).

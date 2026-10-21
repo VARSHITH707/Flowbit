@@ -36,6 +36,10 @@ def reference_clips() -> list[tuple[np.ndarray, str]]:
 
 def score(model: str, clips, language: str) -> tuple[float, float]:
     eng = Engine(model, offline=True)
+    try:
+        eng.transcribe(clips[0][0], language)  # warm-up: the first GPU call is slow, keep it out of the timing
+    except TranscribeError:
+        pass
     pairs, t = [], time.perf_counter()
     for audio, ref in clips:
         try:

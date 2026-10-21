@@ -98,7 +98,7 @@ def main() -> None:
     kw = {"revision": BASE_REV, "cache_dir": MODELS_DIR, "local_files_only": True}
     processor = WhisperProcessor.from_pretrained(BASE, **kw)
     processor.tokenizer.set_prefix_tokens(language=a.language, task="transcribe", predict_timestamps=False)
-    model = WhisperForConditionalGeneration.from_pretrained(BASE, torch_dtype=torch.bfloat16, **kw)
+    model = WhisperForConditionalGeneration.from_pretrained(BASE, dtype=torch.bfloat16, **kw)
     model.config.use_cache = False
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     lora = LoraConfig(r=a.rank, lora_alpha=2 * a.rank, lora_dropout=0.05,
@@ -144,11 +144,16 @@ def main() -> None:
     tmp = MODELS_DIR / f"{a.name}-hf"
     if out.exists():
         shutil.rmtree(out)
-    model.save_pretrained(str(out / "adapter"))
+    adapter = MODELS_DIR / f"{a.name}-adapter"
+    model.save_pretrained(str(adapter))  # moved into out after converting (the converter empties out)
     merged = model.merge_and_unload()
     merged.config.use_cache = True
     merged.to(torch.float16).save_pretrained(str(tmp))
     processor.save_pretrained(str(tmp))
+    base_dir = MODELS_DIR / f"models--{BASE.replace('/', '--')}" / "snapshots" / BASE_REV  # HF cache layout
+    for f in ("preprocessor_config.json", "tokenizer.json"):  # transformers 5 no longer writes these separately
+        if not (tmp / f).exists():
+            shutil.copy2(base_dir / f, tmp / f)
     del model, merged
     torch.cuda.empty_cache()
 
@@ -156,6 +161,7 @@ def main() -> None:
     ctranslate2.converters.TransformersConverter(str(tmp), copy_files=["tokenizer.json", "preprocessor_config.json"]
                                                  ).convert(str(out), quantization="float16", force=True)
     shutil.rmtree(tmp)
+    shutil.move(str(adapter), str(out / "adapter"))
     (out / "training.json").write_text(json.dumps({
         "base": BASE, "base_revision": BASE_REV, "language": a.language, "epochs": a.epochs, "lr": a.lr,
         "rank": a.rank, "batch": a.batch * a.accum, "steps": step, "train_clips": len(train),

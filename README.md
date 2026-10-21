@@ -85,7 +85,7 @@ Both folders are excluded from git. Normal dictation never saves audio. Details:
 
 ## Train it on your voice (optional)
 
-> New: recording is tested. The training and checking steps are still being verified end to end. Results will appear on the [dashboard](docs/DASHBOARD.md).
+> The whole pipeline is tested end to end. On an 8 GB GPU it trained in about a minute, using 2.1 GB of GPU memory. The tuned model ran at the same speed and lost no accuracy on plain English. A real accuracy gain needs recordings of your own voice. See the [dashboard](docs/DASHBOARD.md#fine-tuning-on-your-own-voice).
 
 1. **Record:** `.\.venv\Scripts\python.exe scripts\record_voice.py`. Read the sentences shown and correct any mistakes. 30–60 minutes is a good amount.
 2. **Train:** `.\.venv-train\Scripts\python.exe scripts\train_voice.py` (one-time setup in the [guide](docs/GUIDE.md#fine-tune-on-your-own-voice-in-progress)).

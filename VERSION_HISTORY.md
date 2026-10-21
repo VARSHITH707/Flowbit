@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v2.2.1](#v221--2026-10-21) | 2026-10-21 | Fine-tuning pipeline verified end to end; data moved off C |
 | [v2.2.0](#v220--2026-10-21) | 2026-10-21 | Moving logo while recording, dashboard, new README, fine-tuning scripts |
 | [v2.1.0](#v210--2026-10-21) | 2026-10-21 | Fine-tuning step 1: record a dataset of my voice |
 | [v2.0.4](#v204--2026-10-21) | 2026-10-21 | Text export readable in Notepad, with original wording |
@@ -14,6 +15,33 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v2.2.1 · 2026-10-21
+**Theme:** Prove the fine-tuning pipeline works, and compare the new model with the old one.
+
+### Fixed (found by running it)
+- transformers 5 renamed the `torch_dtype` option.
+- transformers 5 no longer writes `preprocessor_config.json`, which the faster-whisper converter needs. It is now copied from the base model.
+- The converter empties its output folder, which deleted the saved LoRA adapter. The adapter is now saved aside and moved in afterwards.
+- The comparison timed the GPU's one-time warm-up as if it were model speed (14.7 s vs 0.28 s). It now warms up first (0.27 s vs 0.28 s).
+- The first PyTorch download timed out (uv's 30-second default), so the timeout was raised.
+
+### Tested: before vs after, on synthetic test clips
+| | Base `large-v3-turbo` | Trained `my-voice` |
+|---|---|---|
+| Errors, held-out clip | 0.0% | 0.0% |
+| Errors, reference English | 0.0% | 0.0% |
+| Speed per clip | 0.27 s | 0.28 s |
+
+- Training took 8 steps in 1.0 min, used 2.1 GB of GPU memory at peak, and trained 13.1 M parameters (1.6% of the model).
+- The verdict was **NOT BETTER**, which is correct: the clips were synthetic and labelled by the base model itself, so there was nothing to learn. The test proves the pipeline works and that the tuned model doesn't get worse. A real gain needs my own recordings.
+- The test model was deleted afterwards, so Settings never offers a "my-voice" model that wasn't trained on my voice.
+
+### Changed
+- My real data moved off C: 25 dictations, settings and learned words (verified), and the old C copies were deleted.
+- The README and dashboard show the pipeline result.
 
 ---
 

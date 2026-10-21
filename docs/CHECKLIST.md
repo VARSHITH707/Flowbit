@@ -171,7 +171,11 @@
 - [x] 10.1 Voice dataset recorder (scripts/record_voice.py, voicetype/voicedata.py, scripts/voice_prompts.txt)
   - Evidence: tests/test_voicedata.py 3/3; hidden-window smoke test: model on cuda, test clip transcribed exactly, saved, counted, double-save guarded, undo; real mic 2 s captured, nothing saved before Save. Clips only in userdata\voice (gitignored).
 - [ ] 10.2 User records 30-60 min of their voice (needs the user)
-- [ ] 10.3 Training environment (separate venv inside the project; PyTorch + transformers + peft; HF whisper-large-v3-turbo weights) - needs download approval
-- [ ] 10.4 LoRA fine-tune script; fits 8 GB VRAM; held-out split by clip
-- [ ] 10.5 Merge + convert to CTranslate2 (int8_float16) into models\, selectable in Settings
+- [x] 10.3 Training environment (separate venv inside the project; PyTorch + transformers + peft; HF whisper-large-v3-turbo weights)
+  - Evidence: user approved downloads 2026-10-21. .venv-train: torch 2.11.0+cu128 (cuda True), transformers 5.20.2, peft 0.21.2, ctranslate2 4.8.3; package cache in .tmp (not C:). Base model pinned 41f01f3 in models\. First torch download timed out (uv 30 s default) -> UV_HTTP_TIMEOUT=900.
+- [x] 10.4 LoRA fine-tune script; fits 8 GB VRAM; held-out split by clip
+  - Evidence: scripts/train_voice.py on 12 synthetic clips: 8 steps, 1.0 min, 2.1 GB peak GPU, 13.1 M trainable params (1.6%), held-out loss 0.167 -> 0.100. FOUND+FIXED: transformers 5 renamed torch_dtype, no longer writes preprocessor_config.json; the converter empties its output dir (adapter was lost) -> saved aside and moved in after.
+- [x] 10.5 Merge + convert to CTranslate2 into models\, selectable in Settings
+  - Evidence: models\my-voice written (model.bin, config, tokenizer, preprocessor, adapter\, training.json) and loaded by voicetype.speech.Engine; models.CUSTOM lists it (unit test). Test model deleted afterwards so Settings does not offer a model not trained on the user's voice.
 - [ ] 10.6 Evaluate: WER on held-out clips of the user's voice (baseline vs tuned) AND on the TTS reference clips (no regression); switch default only if better
+  - PARTIAL: scripts/eval_voice.py verified on the pipeline test (0.0% vs 0.0%, 0.27 vs 0.28 s/clip after adding a GPU warm-up to the timing; verdict NOT BETTER, correct). Needs the user's real recordings (10.2).

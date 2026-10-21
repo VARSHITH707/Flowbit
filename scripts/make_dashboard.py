@@ -113,7 +113,10 @@ def build(m: dict) -> str:
 
     f = m.get("finetune")
     md += ["## Fine-tuning on your own voice", ""]
-    if f:
+    if f and not any(r["base"] or r["tuned"] for r in f["rows"]):  # all zero: a chart of empty bars says nothing
+        md += [table(["Test set", "Clips", "Base", "Fine-tuned"],
+                     [[r["label"], r["clips"], f"{r['base']}%", f"{r['tuned']}%"] for r in f["rows"]]), "", f["note"], ""]
+    elif f:
         svg = hbar_svg("Word error rate: base model vs fine-tuned (%, lower is better)",
                        [{"label": r["label"], "bars": [(r["base"], "b", f"base: {r['base']}%"),
                                                        (r["tuned"], "a", f"fine-tuned: {r['tuned']}%")]}

@@ -5,7 +5,7 @@
 | Project | VoiceType, a private voice-typing app for Windows 11 (local replacement for Wispr Flow) |
 | Location | Everything in `Z:\Wispr Flow`: code, `userdata\` (history, settings, memory, log), `models\` (speech models). Nothing on C: |
 | Machine | Windows 11 laptop, RTX 4060 Laptop GPU (8 GB), Python 3.11 |
-| Current version | **v2.2.0** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
+| Current version | **v2.2.1** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
 | Repository | https://github.com/VARSHITH707/Unlimited-WisprFlow (public, MIT license) |
 | Status | Working on this machine; first hands-on test passed. Next: improve and fine-tune the models |
 | Last updated | 2026-10-21 |
@@ -47,6 +47,8 @@ Add one row each time something is built or changed. Newest at the bottom.
 | 2026-10-21 | — | decision | Compared faster-whisper and openai/whisper. **Decision: keep faster-whisper** (same accuracy, about 4× faster, 1.2 GB vs about 6 GB of GPU memory, so it fits next to the Smart-mode AI) | Next: fine-tune on my voice |
 | 2026-10-21 | — | `scripts/record_voice.py`, `voicetype/voicedata.py`, `scripts/voice_prompts.txt` | Fine-tuning step 1: a recording window to build a dataset of my voice (90 sentences plus my own past dictations) | 111 tests pass; window tested with a real clip and the real mic |
 | 2026-10-21 | — | `voicetype/ui/pill.py`, `docs/DASHBOARD.md`, `README.md`, `docs/GUIDE.md`, `scripts/train_voice.py`, `scripts/eval_voice.py` | A logo at the bottom of the screen that moves with my voice while recording (still means not recording); results dashboard; simple README with references; fine-tuning training and evaluation scripts | 117 tests pass; real-desktop UI 5/5; training not yet verified end to end |
+| 2026-10-21 | — | `userdata\`, `models\` | Moved my real data off C: 25 dictations, settings and learned words copied into `userdata\` (row count and files verified), then the old C folder and the 3 speech-model copies on C deleted (other projects' models left alone) | Nothing from VoiceType remains on C |
+| 2026-10-21 | — | `.venv-train\`, `scripts/train_voice.py`, `scripts/eval_voice.py` | Training environment installed (PyTorch 2.11 with GPU). Ran the full fine-tuning pipeline and compared before vs after; fixed 4 bugs found on the way | Pipeline works: 1 min, 2.1 GB GPU; tuned model same speed, no accuracy loss. Real gain waits on my recordings |
 
 ## 3. What was delivered
 | Deliverable | Where |
