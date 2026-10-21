@@ -53,3 +53,17 @@ def read_box() -> str:
     with auto.UIAutomationInitializerInThread():
         v = read_control(auto.GetFocusedControl()) or ""
     return v.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def close_own_tab(hwnd, filename: str) -> bool:
+    """Close ONLY the test's own Notepad tab. Win11 Notepad restores the user's previous tabs into every new
+    window, so closing the window (WM_CLOSE) would close the user's tabs too. Ctrl+W closes the active tab, and
+    we only send it when the window title shows our file is the active tab."""
+    from voicetype import insertion as ins
+    focus(hwnd)
+    if not win32gui.GetWindowText(hwnd).startswith(filename):
+        print(f"   (left Notepad open: active tab is not {filename})")
+        return False
+    ins._send([(0x11, 0, 0), (0x57, 0, 0), (0x57, 0, 2), (0x11, 0, 2)])  # Ctrl+W
+    time.sleep(0.8)
+    return True

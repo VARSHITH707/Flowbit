@@ -1,11 +1,11 @@
-# VoiceType: Project Report
+# Flowbit (formerly VoiceType): Project Report
 
 | | |
 |---|---|
 | Project | VoiceType, a private voice-typing app for Windows 11 (local replacement for Wispr Flow) |
 | Location | Everything in `Z:\Wispr Flow`: code, `userdata\` (history, settings, memory, log), `models\` (speech models). Nothing on C: |
 | Machine | Windows 11 laptop, RTX 4060 Laptop GPU (8 GB), Python 3.11 |
-| Current version | **v2.2.1** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
+| Current version | **v3.0.0 Flowbit** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
 | Repository | https://github.com/VARSHITH707/Unlimited-WisprFlow (public, MIT license) |
 | Status | Working on this machine; first hands-on test passed. Next: improve and fine-tune the models |
 | Last updated | 2026-10-21 |
@@ -49,6 +49,7 @@ Add one row each time something is built or changed. Newest at the bottom.
 | 2026-10-21 | — | `voicetype/ui/pill.py`, `docs/DASHBOARD.md`, `README.md`, `docs/GUIDE.md`, `scripts/train_voice.py`, `scripts/eval_voice.py` | A logo at the bottom of the screen that moves with my voice while recording (still means not recording); results dashboard; simple README with references; fine-tuning training and evaluation scripts | 117 tests pass; real-desktop UI 5/5; training not yet verified end to end |
 | 2026-10-21 | — | `userdata\`, `models\` | Moved my real data off C: 25 dictations, settings and learned words copied into `userdata\` (row count and files verified), then the old C folder and the 3 speech-model copies on C deleted (other projects' models left alone) | Nothing from VoiceType remains on C |
 | 2026-10-21 | — | `.venv-train\`, `scripts/train_voice.py`, `scripts/eval_voice.py` | Training environment installed (PyTorch 2.11 with GPU). Ran the full fine-tuning pipeline and compared before vs after; fixed 4 bugs found on the way | Pipeline works: 1 min, 2.1 GB GPU; tuned model same speed, no accuracy loss. Real gain waits on my recordings |
+| 2026-10-21 | — | whole app (`formatting.py`, `ui/mascot.py`, `undo.py`, `hotkeys.py`, `insertion.py`, `dictation.py`, docs) | **Flowbit upgrade (v3.0.0)**: measured that Whisper drops punctuation on run-on speech; built a tested formatting pipeline (lists, bullets, numbers, commands), a guarded AI punctuation pass, Exact/Smart modes, the black-and-orange Flowbit mascot (click to record, drag, never steals focus), safe Undo Last Insertion, shortcut conflict checks (found Ctrl+Alt+Space taken by another program), package rebuilt as Flowbit.exe | 186 tests; real desktop: mascot 11/11, undo 11/11, app 13/13, Smart 8/8, Edge 7/7; 0 network connections |
 
 ## 3. What was delivered
 | Deliverable | Where |

@@ -1,4 +1,4 @@
-# VoiceType dashboard
+# Flowbit dashboard
 
 Measured on one machine: Windows 11, RTX 4060 Laptop GPU (8 GB), Python 3.11. Every number comes from a script or document in this repo (source column). Regenerate with `scripts/make_dashboard.py` after editing `docs/metrics.json`.
 
@@ -9,6 +9,7 @@ Measured on one machine: Windows 11, RTX 4060 Laptop GPU (8 GB), Python 3.11. Ev
 | **0** | network connections while dictating | `scripts/check_offline.py` |
 | **0.5-1.6 s** | from releasing the key to text on screen | `docs/testing.md` |
 | **1.9%** | word error rate, speech model (test audio) | `docs/benchmark.md` |
+| **51 / 51** | formatting cases (lists, numbers, commands, punctuation) | `tests/test_formatting.py` |
 | **14 / 14** | cleanup cases passed by the local AI | `docs/cleanup-benchmark.md` |
 | **6.6 / 8 GB** | GPU memory, speech + AI together | `docs/cleanup-benchmark.md` |
 
@@ -56,6 +57,7 @@ Measured on one machine: Windows 11, RTX 4060 Laptop GPU (8 GB), Python 3.11. Ev
 | v2.1.0 | 2026-10-21 | 111 | Voice recorder for fine-tuning |
 | v2.2.0 | 2026-10-21 | 117 | Moving logo while recording; fine-tuning pipeline; dashboard |
 | v2.2.1 | 2026-10-21 | 117 | Fine-tuning pipeline verified end to end (train, convert, compare) |
+| v3.0.0 | 2026-10-21 | 186 | Flowbit: formatting pipeline, mascot, safe undo, shortcut checks |
 
 Full details: [VERSION_HISTORY.md](../VERSION_HISTORY.md).
 

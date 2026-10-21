@@ -1,9 +1,10 @@
-# VoiceType: Version History
+# Flowbit (formerly VoiceType): Version History
 
 Each version records what was built, what changed since the previous version, the files involved, how it was tested, and what was still open at that point. Newest version first. Never edit or delete an old entry; add a new version on top instead.
 
 | Version | Date | Theme |
 |---|---|---|
+| [v3.0.0](#v300--2026-10-21) | 2026-10-21 | **Flowbit**: formatting pipeline, mascot, safe undo, shortcut checks |
 | [v2.2.1](#v221--2026-10-21) | 2026-10-21 | Fine-tuning pipeline verified end to end; data moved off C |
 | [v2.2.0](#v220--2026-10-21) | 2026-10-21 | Moving logo while recording, dashboard, new README, fine-tuning scripts |
 | [v2.1.0](#v210--2026-10-21) | 2026-10-21 | Fine-tuning step 1: record a dataset of my voice |
@@ -15,6 +16,56 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v3.0.0 · 2026-10-21: Flowbit
+**Theme:** The master upgrade prompt. Rename to Flowbit, fix the transcription quality problems, and add a floating mascot, safe undo and reliable shortcuts.
+**Why:** Punctuation, lists and numbers were wrong. I couldn't see when it was recording. There was no undo. Shortcuts could clash with other apps.
+
+### Found by measuring (before changing anything)
+- **Missing punctuation is a recogniser problem.** In my real history, Whisper returned long dictations with **0 punctuation marks** (129 words in one case). Test speech reproduced it on every model size. A style prompt didn't help.
+- **`Ctrl+Alt+Space` (the old toggle) is registered by another program on this PC**, and so is `Ctrl+Alt+M`.
+- **A comment had swallowed the "hidden window" flag**, so Ollama started with a visible console.
+
+### Added
+- **Formatting pipeline** (`voicetype/formatting.py`). Segment joining at real pauses, spacing, capitals, sentence ends, careful questions, numbered lists from explicit cues, bullets, "new line" and "new paragraph", and context-aware numbers and times. It's rule-based, tested on 51 cases, and works without any AI.
+- **Exact Transcription / Smart Formatting** modes, with switches for numbers, spoken commands, AI punctuation and AI cleanup.
+- **AI punctuation pass** (`cleanup.punctuate`). Only punctuation and capitals may change; it's rejected if any word differs.
+- **Flowbit mascot** (`voicetype/ui/mascot.py`):
+  - Vector art in black and orange.
+  - Click to start or stop, drag to move, right-click for a menu.
+  - Never takes focus.
+  - The sound waves follow the real microphone.
+  - States: idle, recording, transcribing, inserting, done, error.
+  - Opacity, show-when-idle and reduced-motion settings; the position is remembered.
+- **Undo Last Insertion** (`voicetype/undo.py`, `Ctrl+Alt+Z`). It deletes only after proving the window, the text box, the unchanged text and the exact selection.
+- **Shortcut conflict checks** and a **modifier-only toggle** (for example `Ctrl+Win`).
+- **INSERTING state**, and an **adaptive silence auto-stop** (toggle mode only) that says why it stopped.
+- **Insertion guards:** never into Flowbit's own windows; focus restored from Flowbit windows; newer clipboard data kept.
+- **Optional preview** before inserting.
+- **Branding:** the Flowbit name, a `#0B0B0B` / `#FF7900` / `#F5F5F5` theme, the logo, and the mascot icon in the tray, window and `.exe`.
+- **Docs:** `docs/formatting.md`, `docs/windows-integration.md`, a new `docs/status.md` (verified / incomplete / partial / planned / blocked), and the README rewritten for Flowbit.
+
+### Changed
+- Toggle default `Ctrl+Alt+Space` → `Ctrl+Alt+T` (migrated automatically). New Undo shortcut `Ctrl+Alt+Z`.
+- Settings `cleanup_mode` / `show_idle_pill` migrated to `format_mode` / `ai_cleanup` / `mascot_visible`. The theme default is now dark.
+- The local-AI prompt no longer invents lists, and it keeps line breaks. The benchmark still passes 14 of 14.
+- Notepad tests close only their own tab (Windows 11 Notepad restores your tabs into every window). `np_helper.py`, which could kill Notepad, was deleted.
+
+### Tested
+- 186 automated tests pass.
+- Real hardware: mascot 11/11 (real mouse), undo 11/11 (Notepad and Edge), full app 13/13, Smart in the full app 8/8, hotkeys 8/8, insertion 10/10, clipboard 9/9, Edge 7/7, recorder 8/8, spoken Smart clips 6/6, learning in Edge 3/3.
+- 0 outside connections; bandit and pip-audit clean; the packaged `.exe` transcribes on the GPU.
+
+### Still open at v3.0.0
+- Physical key presses by a person on this version.
+- `Ctrl+Win` pressed for real.
+- Multiple monitors.
+- The preview, and the hotkeys inside the `.exe`, run end to end.
+- Accuracy on my real voice.
+- Apps beyond Notepad and Edge.
+- Without the AI, run-on speech still lacks commas.
 
 ---
 

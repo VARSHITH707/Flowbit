@@ -2,9 +2,43 @@
 
 Everything below was actually run on this machine (Windows 11, RTX 4060 Laptop 8 GB, Python 3.11.15). Counts are from the final runs.
 
+## Flowbit v3.0.0 results (2026-10-21)
+
+Every script was run one at a time on an idle machine. Running them next to a PyInstaller build, or straight after another script's windows, made Windows refuse to focus the test window, and every later check in that script then failed. Those runs were repeated, and the table shows the clean runs.
+
+| What | Result |
+|---|---|
+| Automated tests (`pytest -q tests`) | **186 pass** (formatting 51, undo 6, mascot 8, hotkeys, state machine, silence, config migration ...) |
+| `it_ui.py`: mascot with **real mouse input** | **11/11**: never takes focus in 6 states; real click starts/stops; real drag moves it (125% scaling); a drag is not a click; UI max stall 80 ms during 5.7 min of audio |
+| `it_undo.py`: Undo in real Notepad and Edge | **11/11**: removes exactly its text; refuses after an edit, in another window, and in an app that hides its text (Tk) |
+| `it_e2e.py`: the full app (hold, toggle, cancel, focus change, history, log) | **13/13** |
+| `it_e2e_smart.py`: Smart mode in the full app (7-point list, Undo AI edit, history) | **8/8** |
+| `it_hotkeys.py` | **8/8** |
+| `it_insertion.py` | **10/10** |
+| `it_clipboard.py` | **9/9** |
+| `it_browser.py`: Edge textarea and input | **7/7** (now InPrivate, so the new-profile sync page doesn't steal focus) |
+| `it_recorder.py` | **8/8** |
+| `it_smart.py`: spoken clips through Whisper and the AI | **6/6** |
+| `it_learn.py` | **Edge 3/3**. The Notepad part was skipped because the user had Notepad open (tests never touch it) |
+| `check_offline.py` | **0** outside connections |
+| `bench_cleanup.py` (qwen2.5 7B, after the prompt change) | **14/14** |
+| Formatting pipeline on spoken clips (`make_format_clips.ps1`) | list, bullets, numbers, commands and run-on speech all correct (see formatting.md) |
+| Packaged `dist\Flowbit\Flowbit.exe --selftest` | exit 0, GPU, correct transcript |
+| bandit (medium and high), pip-audit | no findings, no known vulnerabilities |
+
+**Bugs found by this round and fixed:**
+- `cancel` hotkey crash (a state name left over from the refactor).
+- The AI rewrote "First point …" so lists were lost. Explicit cues are now applied before the AI.
+- The AI invented a numbered list from ordinary speech. The prompt and examples were changed, and the benchmark re-run.
+- The AI turned "new line" into a paragraph break. Line breaks are now restored exactly.
+- Undo race: a popup could take focus between selecting and deleting. Added a last-moment focus check.
+- Ollama started with a visible console window (a misplaced comment).
+- The build script's icon path was broken by escape characters.
+- Notepad tests closed the whole Notepad window, which Windows 11 fills with the user's restored tabs. They now close only their own tab.
+
 ## Run it
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q tests          # 107 unit/UI tests, ~4 s, no desktop windows (offscreen Qt)
+.\.venv\Scripts\python.exe -m pytest -q tests          # 186 unit/UI tests, ~15 s, no desktop windows (offscreen Qt)
 # Integration scripts: real desktop, real model, real windows. Close other dictation tools first (see "Interference").
 .\.venv\Scripts\python.exe scripts\it_insertion.py     # insertion into an owned Tk window
 .\.venv\Scripts\python.exe scripts\it_hotkeys.py       # global hotkeys with another app focused
@@ -18,7 +52,7 @@ Everything below was actually run on this machine (Windows 11, RTX 4060 Laptop 8
 ```
 Test audio: Windows text-to-speech clips with known reference text (`scripts/make_clips.ps1` -> `data/tts_*.wav`). The e2e/perf scripts replace **only the microphone** with that clip; everything else is the real app.
 
-## Automated tests (107, all passing)
+## Automated tests (v2 numbers; now 186, see above)
 | Area | Tests cover |
 |---|---|
 | Speech engine | empty / silent / no-speech audio raises an error, never text; GPU out-of-memory falls back to CPU (simulated failure); other errors not swallowed |
@@ -75,7 +109,7 @@ See `docs/cleanup-benchmark.md`: qwen2.5:7b-instruct 14/14, phi3 11/14, llama3.2
 
 ## Interference found while testing (important)
 This PC also runs a real **Wispr Flow** whose hold-to-talk chord overlaps Ctrl/Alt/Win. During testing, injected chords made Wispr Flow record the microphone and type its own cloud transcript into my test windows (stray sentences such as "Opa." and room speech appeared in the results). The test scripts now use `Shift+F9/F10/F11`, which never include Ctrl, Alt or Win. Back-to-back runs of the whole suite were still occasionally flaky (Notepad paste, one e2e run) on this shared, in-use machine; each passes on its own repeatedly. If you run the suite, close other dictation tools and do not use the keyboard or mouse meanwhile.
-**If you use both apps, give them different hotkeys** (Settings tab). VoiceType's default hold chord is `ctrl+alt+d`, toggle `ctrl+alt+space`.
+**If you use both apps, give them different hotkeys** (Settings tab). Flowbit's default hold chord is `ctrl+alt+d`, toggle `ctrl+alt+space`.
 
 ## Bugs found by this testing and fixed
 - Win11 Notepad sometimes opens with keyboard focus on a toolbar **button**; Ctrl+V there silently did nothing. Now detected: text copied with a message. (Earlier 'flaky Notepad paste' failures were mostly this.)

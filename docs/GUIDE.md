@@ -1,4 +1,4 @@
-# VoiceType: full guide
+# Flowbit: full guide
 
 The short version is the [README](../README.md). This page has every detail.
 
@@ -15,7 +15,7 @@ License: [MIT](../LICENSE). You are free to clone, use and modify your own copy.
 - Python **3.11** (not 3.13). [uv](https://docs.astral.sh/uv/) is the easiest way to get it
 - Optional: NVIDIA GPU + recent driver for fast transcription (about 1.1 GB VRAM with the default model). Without one the app uses the CPU automatically (slower)
 - About 2 GB disk for the `large-v3-turbo` model (or 0.5 GB for `small`), downloaded once
-- For **Smart mode** (AI cleanup, see below): [Ollama](https://ollama.com) installed, then `ollama pull qwen2.5:7b-instruct-q4_K_M` (4.7 GB, once). Whisper + this model use about 6.6 GB of an 8 GB GPU. Without Ollama, VoiceType still works and simply inserts the plain transcript
+- For **Smart mode** (AI cleanup, see below): [Ollama](https://ollama.com) installed, then `ollama pull qwen2.5:7b-instruct-q4_K_M` (4.7 GB, once). Whisper + this model use about 6.6 GB of an 8 GB GPU. Without Ollama, Flowbit still works and simply inserts the plain transcript
 
 ## Install
 ```powershell
@@ -41,17 +41,20 @@ After the download, dictation works fully offline. The app lives in the system t
 | Action | Default hotkey |
 |---|---|
 | Dictate (push to talk) | **hold** `Ctrl+Alt+D`, speak, release |
-| Dictate (toggle) | press `Ctrl+Alt+Space` to start, again to stop |
+| Dictate (toggle) | press `Ctrl+Alt+T` (or click the mascot) to start, again to stop |
 | Cancel (nothing is inserted) | `Esc` while recording or transcribing |
+| Undo last insertion | `Ctrl+Alt+Z` (only removes Flowbit's text when it can prove it is unchanged; see windows-integration.md) |
 | Open settings | `Ctrl+Alt+Shift+V` |
 
+Flowbit refuses shortcuts that are editing keys (`Ctrl+Z`, `Ctrl+C` ...), that overlap each other, or that another program already registered. A modifier-only toggle such as `Ctrl+Win` is possible (it fires when you press and release just those keys), but not while Wispr Flow is running, which uses it.
+
 1. Click into any text field (Notepad, browser, chat, editor).
-2. Hold the hotkey and speak. The small logo at the bottom of the screen turns red and its bars move with your voice (*Listening*), then turns amber (*Transcribing*), then green (*Done*). **If the logo is not moving, VoiceType is not recording.**
+2. Hold the hotkey and speak. The mascot at the bottom of the screen turns bright orange and its sound waves follow your voice (*Listening*), shows an orange ring while transcribing and inserting, then smiles with a check (*Done*). **If it is dim and not moving, Flowbit is not recording.** Drag it anywhere (the position is remembered), click it to start/stop, right-click for a menu.
 3. The text is pasted where your cursor was. Your clipboard is restored afterwards.
 
-### Smart mode (default): cleanup like Wispr Flow, on your laptop
-A local AI (qwen2.5 7B through Ollama on `127.0.0.1`) tidies what you said before it is pasted:
-| You say | VoiceType types |
+### Smart Formatting (default) and Exact Transcription
+Smart Formatting applies rules for punctuation, capitals, numbered/bullet lists, spoken commands ("new line", "new paragraph", "end list") and numbers (details and examples: [formatting.md](formatting.md)). Exact Transcription keeps your words exactly as recognised. With Ollama installed, the local AI can also add missing punctuation to run-on speech (words are never changed) and, in Smart mode, remove fillers and self-corrections:
+| You say | Flowbit types |
 |---|---|
 | "um so I think uh we should ship it on Friday" | So I think we should ship it on Friday. |
 | "let's do coffee at 2 actually 3" | Let's do coffee at 3. |
@@ -60,10 +63,10 @@ A local AI (qwen2.5 7B through Ollama on `127.0.0.1`) tidies what you said befor
 | "hello comma how are you question mark" | Hello, how are you? |
 | "I actually enjoyed the movie" / "what is the capital of France" | kept as said (not "corrected", not answered) |
 
-Safety: if the AI's version contains words you never said, or drops most of it, or the AI is not running, VoiceType pastes the plain transcript instead and tells you why. **Undo AI edit** (Home tab, and *Copy original* in History) gives you exactly what was recognised. Writing style can be set per kind of app (email, work chat, personal chat, code, other); casual style drops the final period in chat apps, as Wispr Flow does.
+Safety: if the AI's version contains words you never said, or drops most of it, or the AI is not running, Flowbit pastes the plain transcript instead and tells you why. **Undo AI edit** (Home tab, and *Copy original* in History) gives you exactly what was recognised. Writing style can be set per kind of app (email, work chat, personal chat, code, other); casual style drops the final period in chat apps, as Wispr Flow does.
 
 ### Memory: it learns from your corrections
-After pasting, VoiceType keeps an eye on that same text box. When you fix a word it typed (for example *cubernetes* to *Kubernetes*) and move on, it remembers the fix in `userdata\memory` (inside the VoiceType folder) and writes it your way next time. **Names** (you capitalised them) apply after one fix; **other words** only after you make the same fix twice, so a one-off edit never rewrites future text; content changes such as *Friday* to *Monday* are never learned. See and delete what it learned in the **Memory** tab. Works in apps that expose their text to Windows (verified: Notepad, Edge); elsewhere it quietly does nothing. Turn it off in Settings.
+After pasting, Flowbit keeps an eye on that same text box. When you fix a word it typed (for example *cubernetes* to *Kubernetes*) and move on, it remembers the fix in `userdata\memory` (inside the Flowbit folder) and writes it your way next time. **Names** (you capitalised them) apply after one fix; **other words** only after you make the same fix twice, so a one-off edit never rewrites future text; content changes such as *Friday* to *Monday* are never learned. See and delete what it learned in the **Memory** tab. Works in apps that expose their text to Windows (verified: Notepad, Edge); elsewhere it quietly does nothing. Turn it off in Settings.
 
 If you switch to another window while speaking, the text is **not** pasted anywhere: it is copied to the clipboard and you are told (you can change this in Settings). Hotkeys can be changed in **Settings**; if you also run another dictation tool, give the two apps different hotkeys.
 
@@ -85,7 +88,7 @@ uv pip install --python .venv-train\Scripts\python.exe torch --index-url https:/
 uv pip install --python .venv-train\Scripts\python.exe transformers peft ctranslate2==4.8.3 numpy
 .\.venv\Scripts\python.exe -c "import huggingface_hub as h; from voicetype.config import MODELS_DIR; h.snapshot_download('openai/whisper-large-v3-turbo', revision='41f01f3fe87f28c78e2fbf8b568835947dd65ed9', cache_dir=MODELS_DIR, allow_patterns=['*.json','*.txt','model.safetensors'])"
 ```
-Then quit VoiceType and the recorder, so the GPU is free, and run:
+Then quit Flowbit and the recorder, so the GPU is free, and run:
 ```powershell
 .\.venv-train\Scripts\python.exe scripts\train_voice.py
 ```
@@ -98,7 +101,7 @@ It uses LoRA, which trains small extra layers instead of the whole model, so it 
 This compares `my-voice` with `large-v3-turbo` on your held-out clips, and on reference clips to make sure plain English didn't get worse. Switch to it in **Settings → Model → my-voice** only if it says **BETTER**.
 
 ## Settings and data
-Everything VoiceType saves stays **inside its own folder**: settings, history, memory and the log in `userdata\`, speech models in `models\`. Both are excluded from git. (Settings has an *Open data folder* button). Audio is never saved. Details: [docs/privacy.md](privacy.md).
+Everything Flowbit saves stays **inside its own folder**: settings, history, memory and the log in `userdata\`, speech models in `models\`. Both are excluded from git. (Settings has an *Open data folder* button). Audio is never saved. Details: [docs/privacy.md](privacy.md).
 
 | Setting | Notes |
 |---|---|
@@ -107,8 +110,11 @@ Everything VoiceType saves stays **inside its own folder**: settings, history, m
 | Language | English by default; pick another or auto-detect (only English was tested) |
 | Hotkeys / mode | hold, toggle, or both |
 | Longest recording | default 5 minutes; optional stop after a pause in speech |
-| Text mode | *Smart* (default, local AI cleanup), *Clean* (only drops um/uh), *Exact* (as recognised) |
-| Local AI model | default `qwen2.5:7b-instruct-q4_K_M` (chosen by benchmark, see docs/cleanup-benchmark.md) |
+| Formatting mode | *Smart Formatting* (default) or *Exact Transcription* |
+| Numbers / spoken commands | switches for digit formatting and for "new line", "first point", "bullet point" ... (Smart); commands can also be enabled in Exact |
+| Local AI steps | punctuation for run-on speech (words never change) and, in Smart mode, cleanup of fillers/self-corrections; model default `qwen2.5:7b-instruct-q4_K_M` (benchmark: cleanup-benchmark.md) |
+| Preview before inserting | off by default: check or edit the text, then Insert / Copy only / Cancel |
+| Mascot | show when idle, opacity, reduced motion, move back to bottom centre |
 | Writing style per app | formal or casual for email, work chat, personal chat, code, everything else |
 | Learn from my corrections | on by default; reads the text box after pasting, on this PC only |
 | Custom vocabulary | `Kubernetes` fixes spelling/case; `py side six=>PySide6` replaces what was heard |
@@ -117,18 +123,22 @@ Everything VoiceType saves stays **inside its own folder**: settings, history, m
 ## Tests
 ```powershell
 uv pip install --python .venv\Scripts\python.exe -r requirements-dev.txt
-.\.venv\Scripts\python.exe -m pytest -q tests          # 117 tests, ~10 s, opens no windows
+.\.venv\Scripts\python.exe -m pytest -q tests          # 186 tests, ~15 s, opens no windows
 ```
 Hardware-dependent integration scripts and their results are in [docs/testing.md](testing.md).
 
 ## Troubleshooting
 | Problem | What to do |
 |---|---|
+| "Shortcut problem: ... is already used by another program" | Pick another shortcut in Settings. Flowbit found that Ctrl+Alt+Space and Ctrl+Alt+M are taken on the test PC |
+| Undo says it was skipped | By design: Flowbit only removes its own text when the box is unchanged and still focused. Use the app's own Ctrl+Z instead |
+| Text stays one long run-on sentence | Install Ollama (see Requirements) and keep "Add missing punctuation" on; without it only rules apply (see formatting.md) |
+| The mascot is in the way | Drag it; or lower its opacity, or untick "Show the Flowbit mascot when idle" (it still appears while recording) |
 | "Model ... is not downloaded yet" | Models tab -> Download (needs internet once) |
-| Nothing happens when I press the hotkey | Another app may use the same keys (change them in Settings). The hook cannot see keys typed into windows running **as administrator**: run VoiceType as admin or dictate into a normal window |
+| Nothing happens when I press the hotkey | Another app may use the same keys (change them in Settings). The hook cannot see keys typed into windows running **as administrator**: run Flowbit as admin or dictate into a normal window |
 | Text goes to the clipboard instead of the window | Focus moved while you were speaking (by design), or the target is an elevated window |
 | "AI cleanup skipped: ..." | The AI's version added or dropped words, so the plain transcript was used (by design). If it says the local AI is unavailable: start Ollama and run `ollama pull qwen2.5:7b-instruct-q4_K_M` |
-| Smart mode is slow the first time | The AI loads when VoiceType starts (about 3-15 s in the background). After that, about 0.5-1.6 s per dictation |
+| Smart mode is slow the first time | The AI loads when Flowbit starts (about 3-15 s in the background). After that, about 0.5-1.6 s per dictation |
 | "No speech detected" / "No audio captured" | Mic is silent or muted: check Settings -> Microphone and Windows microphone privacy settings |
 | GPU error / out of memory | Pick `small` or CPU in Settings. The app already retries on the CPU automatically and says so |
 | Slow first dictation | The model loads on first use (about 3 s from cache). It is unloaded after 10 idle minutes (changeable) |
@@ -141,12 +151,12 @@ Hardware-dependent integration scripts and their results are in [docs/testing.md
 ## Build a standalone executable
 ```powershell
 uv pip install --python .venv\Scripts\python.exe -r requirements-dev.txt
-powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1            # GPU build -> dist\VoiceType\VoiceType.exe
+powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1            # GPU build -> dist\Flowbit\Flowbit.exe
 powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1 -CpuOnly   # CPU build (much smaller)
 ```
-The result is a folder (`dist\VoiceType`), not a single file. Copy the whole folder. Speech models are **not** bundled: they download on first use, as in the development install.
+The result is a folder (`dist\Flowbit`), not a single file. Copy the whole folder. Speech models are **not** bundled: they download on first use, as in the development install.
 
-What was verified for the GPU build (about 2.3 GB, of which ~2.0 GB is NVIDIA's cuBLAS/cuDNN): it launches and exits with code 0, shows its windows, and transcribes on the GPU from inside the `.exe` (`VoiceType.exe --selftest sample.wav --selftest-out result.json` writes a JSON report; the packaged app has no console). **Not verified:** the hotkey/insert flow and the first-run wizard inside the packaged build (they run the same code as the development install), the CPU-only build, installing on a second PC, and code signing (Windows SmartScreen will warn about an unsigned `.exe`).
+What was verified for the GPU build (about 2.3 GB, of which ~2.0 GB is NVIDIA's cuBLAS/cuDNN): it launches and exits with code 0, shows its windows, and transcribes on the GPU from inside the `.exe` (`Flowbit.exe --selftest sample.wav --selftest-out result.json` writes a JSON report; the packaged app has no console). **Not verified:** the hotkey/insert flow and the first-run wizard inside the packaged build (they run the same code as the development install), the CPU-only build, installing on a second PC, and code signing (Windows SmartScreen will warn about an unsigned `.exe`).
 
 Gotcha fixed in the build script: building from a shell whose PATH contains Git's `mingw64\bin` bundles the wrong OpenSSL and breaks `import ssl` ("DLL load failed while importing _ssl"). The script builds with a clean PATH.
 

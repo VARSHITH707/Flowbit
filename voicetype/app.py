@@ -12,7 +12,7 @@ import threading
 
 from . import cleanup, insertion, memory, undo
 from .config import Config, data_dir
-from .dictation import ACTIVE, DONE, FAILED, IDLE, RECORDING, Dictation, Settings
+from .dictation import ACTIVE, DONE, FAILED, IDLE, Dictation, Settings
 from .history import History
 from . import hotkeys as hk
 from .hotkeys import Hotkeys
@@ -224,7 +224,7 @@ class App:
             on_start=lambda: mode("both", "hold") and self.dictation.start("hold"),
             on_stop=lambda: mode("both", "hold") and self.dictation.stop(),
             on_toggle=lambda: mode("both", "toggle") and self.dictation.toggle(),
-            on_cancel=lambda: self.dictation.state in (RECORDING, PROCESSING) and self.dictation.cancel(),
+            on_cancel=lambda: self.dictation.state in ACTIVE and self.dictation.cancel(),
             on_settings=lambda: self.bridge.show_tab.emit("settings"),
             on_undo=lambda: self.bridge.undo.emit(),
             bindings=self.holder.cfg.hotkeys)

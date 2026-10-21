@@ -73,7 +73,7 @@ def table(headers: list[str], rows: list[list]) -> str:
 
 def build(m: dict) -> str:
     IMG.mkdir(parents=True, exist_ok=True)
-    md = ["# VoiceType dashboard", "",
+    md = ["# Flowbit dashboard", "",
           f"Measured on one machine: {m['machine']}. Every number comes from a script or document in this repo "
           "(source column). Regenerate with `scripts/make_dashboard.py` after editing `docs/metrics.json`.", "",
           "## At a glance", "", table(["", "What it means", "Source"],

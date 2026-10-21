@@ -17,6 +17,7 @@ import win32con
 import win32gui
 
 from it_helpers import Target
+from it_learn_helpers import close_own_tab  # noqa: E402
 from voicetype import insertion as ins
 from voicetype import memory
 from voicetype.learner import EditWatcher
@@ -121,7 +122,7 @@ try:
         focus(np_hwnd)
         ins._send([(0x11, 0, 0), (0x53, 0, 0), (0x53, 0, 2), (0x11, 0, 2)])
         time.sleep(0.8)
-        win32gui.PostMessage(np_hwnd, win32con.WM_CLOSE, 0, 0)
+        close_own_tab(np_hwnd, path.name)  # never the whole window: it may hold the user's restored tabs
         time.sleep(1)
         path.unlink(missing_ok=True)
 
@@ -132,7 +133,7 @@ try:
     page.write_text("<!doctype html><title>VT Learn Edge</title><textarea autofocus rows=5 cols=50></textarea>", encoding="utf-8")
     before = set()
     win32gui.EnumWindows(lambda h, _: before.add(h), None)
-    subprocess.Popen([exe, f"--user-data-dir={work / 'prof'}", "--no-first-run", "--new-window", page.as_uri()])
+    subprocess.Popen([exe, f"--user-data-dir={work / 'prof'}", "--no-first-run", "--no-default-browser-check", "--inprivate", "--new-window", page.as_uri()])
     ed = None
     for _ in range(80):
         found = []

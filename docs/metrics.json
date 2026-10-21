@@ -18,6 +18,11 @@
       "source": "docs/benchmark.md"
     },
     {
+      "value": "51 / 51",
+      "label": "formatting cases (lists, numbers, commands, punctuation)",
+      "source": "tests/test_formatting.py"
+    },
+    {
       "value": "14 / 14",
       "label": "cleanup cases passed by the local AI",
       "source": "docs/cleanup-benchmark.md"
@@ -143,6 +148,12 @@
       "date": "2026-10-21",
       "tests": 117,
       "what": "Fine-tuning pipeline verified end to end (train, convert, compare)"
+    },
+    {
+      "version": "v3.0.0",
+      "date": "2026-10-21",
+      "tests": 186,
+      "what": "Flowbit: formatting pipeline, mascot, safe undo, shortcut checks"
     }
   ],
   "finetune": {

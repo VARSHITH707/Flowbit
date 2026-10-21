@@ -1,23 +1,24 @@
-# VoiceType
+<p align="center"><img src="docs/img/flowbit-logo.svg" alt="Flowbit" width="420"></p>
 
-**Free, private voice typing for Windows.** Hold a key, speak, let go, and your words are typed wherever your cursor is: email, chat, browser, code editor, anywhere.
+**Flowbit is free, private voice typing for Windows.** Click into any text box, hold a key (or click the little mascot), speak, and your words appear, neatly punctuated, with lists and numbers formatted.
 
-Everything runs on your own PC. No account, no subscription, no word limit, and your voice never leaves your computer.
+Speech recognition and formatting run on your own PC. No account, no subscription, no weekly word limit, and your voice never leaves your computer.
 
-<p align="center"><img src="docs/img/indicator.svg" alt="The VoiceType logo at the bottom of the screen: still when not recording, moving while recording" width="420"></p>
+<p align="center"><img src="docs/img/indicator.svg" alt="The Flowbit mascot: dim and still when not recording, bright orange with moving sound waves while recording" width="460"></p>
 
-> Not affiliated with or endorsed by Wispr Flow. This is an independent, open-source project that does the same job locally.
+> Not affiliated with or endorsed by Wispr Flow. Flowbit is an independent open-source project that does the same job locally. A public search found a cancelled 2013 US "FLOWBIT" trademark and an unrelated "FlowBits" smart-home app. No conflict was found, but name availability is not guaranteed.
 
 ## What it does
 
 | | |
 |---|---|
-| **Types anywhere** | Works in any app with a text box. Your clipboard is put back afterwards. |
-| **Cleans up your speech** | Removes "um" and "uh", fixes self-corrections ("at 2, actually 3" becomes "at 3"), builds numbered lists, and turns "comma" and "question mark" into punctuation. A local AI does this. |
-| **Learns from you** | When you correct a name or word it got wrong, it remembers it for next time. |
-| **Shows when it's listening** | A small logo at the bottom of the screen moves with your voice while recording. If it isn't moving, it isn't recording. |
-| **Stays private** | Speech recognition and the AI both run on your PC. Tested: 0 network connections while dictating. |
-| **Can learn your voice** | Optional: record yourself and fine-tune the speech model on your own voice. |
+| **Types anywhere** | Notepad, VS Code, browsers, chat apps: any text box. Your clipboard is put back afterwards. |
+| **Readable text** | Punctuation, capitals and spacing. "First point … second point …" becomes a numbered list; "bullet point" makes bullets; "new paragraph" and "new line" work; "fifteen percent" becomes 15%. |
+| **Two modes** | **Smart Formatting**, or **Exact Transcription** (your words exactly as recognised). |
+| **A mascot that shows the truth** | It floats at the bottom of the screen. It's dim when idle, turns bright orange with sound waves that follow your real voice while recording, and shows a progress ring while working. If it isn't moving, it isn't recording. Click it to start or stop; drag it anywhere. |
+| **Safe undo** | `Ctrl+Alt+Z` removes the last text Flowbit typed, but only when it can prove that's exactly its text. |
+| **Learns from you** | Your own vocabulary, plus words it learns when you correct its typing. |
+| **Private** | Everything runs on this PC. Tested: 0 network connections while dictating. |
 
 ## Quick start
 
@@ -31,80 +32,74 @@ uv pip install --python .venv\Scripts\python.exe -r requirements.txt
 .\.venv\Scripts\python.exe -m voicetype
 ```
 
-A short setup wizard opens on first start: pick your microphone and download the speech model (about 1.6 GB, once).
+The first start downloads the speech model once (about 1.6 GB). After that, dictation works offline.
 
-For the speech cleanup, install [Ollama](https://ollama.com) and run `ollama pull qwen2.5:7b-instruct-q4_K_M` (4.7 GB, once). Without it, VoiceType still types exactly what you said.
+**Optional:** install [Ollama](https://ollama.com) and run `ollama pull qwen2.5:7b-instruct-q4_K_M` (4.7 GB, once). The local AI then adds punctuation to long run-on sentences (it may never change a word) and removes fillers and self-corrections ("2, actually 3" becomes "3"). Without it, everything else still works.
 
 No `uv`? Use `py -3.11 -m venv .venv` and `.venv\Scripts\python -m pip install -r requirements.txt` instead.
 
 ## How to use it
 
 1. Click in any text box.
-2. **Hold `Ctrl+Alt+D`** and speak. The logo at the bottom turns red and moves.
-3. **Let go.** Your text appears in a second or two.
+2. **Hold `Ctrl+Alt+D`** and speak, then let go. Or press **`Ctrl+Alt+T`** (or click the mascot) to start, and again to stop.
+3. The text appears where your cursor was.
 
-| Do this | Press |
+| Action | Shortcut |
 |---|---|
-| Dictate while holding the key | hold `Ctrl+Alt+D` |
-| Start and stop hands-free | `Ctrl+Alt+Space` |
+| Push to talk | hold `Ctrl+Alt+D` |
+| Start / stop (toggle) | `Ctrl+Alt+T` or click the mascot |
 | Cancel | `Esc` |
-| Open settings | `Ctrl+Alt+Shift+V` |
+| Undo last insertion | `Ctrl+Alt+Z` |
+| Settings | `Ctrl+Alt+Shift+V` |
 
-| You say | It types |
+You can change every shortcut in Settings. Flowbit refuses shortcuts that clash with editing keys such as `Ctrl+Z`, or that another program already uses.
+
+| You say | Flowbit types |
 |---|---|
-| "um so I think uh we should ship it on Friday" | So I think we should ship it on Friday. |
-| "let's do coffee at 2 actually 3" | Let's do coffee at 3. |
-| "hello comma how are you question mark" | Hello, how are you? |
+| "first point improve the UI second point fix the microphone" | 1. Improve the UI.<br>2. Fix the microphone. |
+| "bullet point improve the design bullet point fix recording errors" | - Improve the design.<br>- Fix recording errors. |
+| "the price went up by fifteen percent to three point five million dollars" | The price went up by 15% to $3.5 million. |
+| "let's do coffee at 2 actually 3" (with the local AI) | Let's do coffee at 3. |
+| "dear team new paragraph the release is ready" | Dear team<br><br>The release is ready. |
 
-Everything you dictate is listed in the **History** tab, with the time. Export it to a text file from there.
+Your history (time, text and your exact original words) is in the **History** tab. Export it to a text file there.
 
 ## How well it works
 
-See the **[dashboard](docs/DASHBOARD.md)** for charts of speed, accuracy and every version.
-
 | | |
 |---|---|
-| Time from letting go to seeing text | **0.5–1.6 s** |
-| Speech recognition errors on test audio | **1.9%** of words |
-| Speech cleanup test cases passed | **14 of 14** |
+| Time from letting go to text | **0.5–1.6 s** |
+| Recognition errors on test audio | **1.9%** of words |
+| Formatting tests | **lists, bullets, numbers, commands, punctuation:** all pass |
 | Network connections while dictating | **0** |
-| Automated tests | **117 pass** |
+| Automated tests | **186 pass** |
 
-All numbers were measured on one laptop (RTX 4060, 8 GB). Accuracy on your own voice and accent will differ, which is what the voice fine-tuning is for.
+See the [dashboard](docs/DASHBOARD.md) for charts and every version, and [feature status](docs/status.md) for what is verified and what isn't.
 
-## Where your data goes
+## Your data stays here
 
-Everything stays inside the VoiceType folder, and none of it is ever uploaded:
-
-| Folder | What's in it |
+| Folder | Contents |
 |---|---|
-| `userdata\` | your history, settings, learned words, and (only if you record them) voice clips for training |
-| `models\` | the speech models |
+| `userdata\` | settings, history, learned words, and voice clips only if you record them for training |
+| `models\` | speech models |
 
-Both folders are excluded from git. Normal dictation never saves audio. Details: [docs/privacy.md](docs/privacy.md).
+Both folders are excluded from git. Normal dictation never saves audio. Details: [privacy](docs/privacy.md).
 
-## Train it on your voice (optional)
+## Documentation
 
-> The whole pipeline is tested end to end. On an 8 GB GPU it trained in about a minute, using 2.1 GB of GPU memory. The tuned model ran at the same speed and lost no accuracy on plain English. A real accuracy gain needs recordings of your own voice. See the [dashboard](docs/DASHBOARD.md#fine-tuning-on-your-own-voice).
-
-1. **Record:** `.\.venv\Scripts\python.exe scripts\record_voice.py`. Read the sentences shown and correct any mistakes. 30–60 minutes is a good amount.
-2. **Train:** `.\.venv-train\Scripts\python.exe scripts\train_voice.py` (one-time setup in the [guide](docs/GUIDE.md#fine-tune-on-your-own-voice-in-progress)).
-3. **Check:** `.\.venv\Scripts\python.exe scripts\eval_voice.py`. It tells you whether your trained model is better. If it is, pick **my-voice** in Settings.
-
-## More
-
-- [Full guide](docs/GUIDE.md): every setting, troubleshooting, and building a `.exe`
-- [Dashboard](docs/DASHBOARD.md): measured results and versions
-- [Version history](VERSION_HISTORY.md) and [project report](PROJECT_REPORT.md)
-- [How it's built](docs/architecture.md) and [what's tested](docs/testing.md)
+- [Guide](docs/GUIDE.md): every setting, troubleshooting, building a `.exe`, training on your voice
+- [Formatting](docs/formatting.md): how punctuation, lists and numbers work, and why punctuation was missing (measured)
+- [Windows integration](docs/windows-integration.md): shortcuts, mascot, focus, insertion, undo and their limits
+- [Feature status](docs/status.md), [testing](docs/testing.md), [architecture](docs/architecture.md)
+- [Version history](VERSION_HISTORY.md), [project report](PROJECT_REPORT.md), [dashboard](docs/DASHBOARD.md)
 
 ## References
 
 1. Radford, A. et al. (2022). *Robust Speech Recognition via Large-Scale Weak Supervision*. OpenAI. [arXiv:2212.04356](https://arxiv.org/abs/2212.04356). This is the Whisper model that turns speech into text.
-2. Hu, E. J. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685). This is the method used to fine-tune Whisper on your voice in 8 GB of GPU memory.
-3. SYSTRAN. *faster-whisper: Faster Whisper transcription with CTranslate2*. [github.com/SYSTRAN/faster-whisper](https://github.com/SYSTRAN/faster-whisper). This is the engine VoiceType runs Whisper with: about 4× faster and much lighter than the original.
+2. Hu, E. J. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685). This is how Flowbit can be fine-tuned on your voice in 8 GB of GPU memory.
+3. SYSTRAN. *faster-whisper*. [github.com/SYSTRAN/faster-whisper](https://github.com/SYSTRAN/faster-whisper). This is the engine Flowbit runs Whisper with.
 
-Also built with [Ollama](https://ollama.com) and [Qwen2.5](https://github.com/QwenLM/Qwen2.5) for the cleanup, and [PySide6](https://doc.qt.io/qtforpython-6/) for the app window.
+Also built with [Ollama](https://ollama.com) and [Qwen2.5](https://github.com/QwenLM/Qwen2.5) (optional local AI), and [PySide6](https://doc.qt.io/qtforpython-6/).
 
 ## License
 

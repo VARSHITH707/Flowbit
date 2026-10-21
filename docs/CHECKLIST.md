@@ -179,3 +179,23 @@
   - Evidence: models\my-voice written (model.bin, config, tokenizer, preprocessor, adapter\, training.json) and loaded by voicetype.speech.Engine; models.CUSTOM lists it (unit test). Test model deleted afterwards so Settings does not offer a model not trained on the user's voice.
 - [ ] 10.6 Evaluate: WER on held-out clips of the user's voice (baseline vs tuned) AND on the TTS reference clips (no regression); switch default only if better
   - PARTIAL: scripts/eval_voice.py verified on the pipeline test (0.0% vs 0.0%, 0.27 vs 0.28 s/clip after adding a GPU warm-up to the timing; verdict NOT BETTER, correct). Needs the user's real recordings (10.2).
+
+## PHASE 11: Flowbit upgrade (master upgrade prompt, 2026-10-21)
+- [x] 11.1 Inspect project, git, environment, REA
+  - Evidence: clean tree; Python 3.11.15, ctranslate2 4.8.3 (1 CUDA device), faster-whisper 1.2.1, PySide6 6.12; REA 6.7.0 connected (claude mcp list).
+- [x] 11.2 Root cause of missing punctuation, measured
+  - Evidence: real history: 129 words/0 marks, 36 words/0, 38 words/0; TTS run-on clips reproduce it on small, medium and turbo; Whisper style prompt rejected (no gain, Title Case side effect); pauses already punctuated by Whisper. docs/formatting.md.
+- [x] 11.3 Formatting pipeline (segments, spacing, capitals, sentence ends, lists, bullets, commands, numbers, times) + Exact/Smart modes
+  - Evidence: tests/test_formatting.py 51/51; spoken clips through real Whisper correct in both modes.
+- [x] 11.4 Guarded AI punctuation (words must be identical)
+  - Evidence: run-on clips punctuated in 0.5-1.3 s; injection stays text; bench_cleanup 14/14 after prompt change.
+- [x] 11.5 Shortcuts: undo, modifier-only toggle, conflict checks, migration
+  - Evidence: unit tests; RegisterHotKey probe found ctrl+alt+space and ctrl+alt+m taken here -> toggle default ctrl+alt+t; real settings migrated on launch. ctrl+windows not pressed for real (Wispr Flow interference).
+- [x] 11.6 Mascot (branding, states from real state + mic level, click/drag, no focus, persistence, reduced motion)
+  - Evidence: tests/test_indicator.py 8/8; scripts/it_ui.py 11/11 with real mouse input.
+- [x] 11.7 State machine with INSERTING, adaptive silence auto-stop (toggle only), insertion guards, clipboard newer-data guard, preview
+  - Evidence: unit tests; it_e2e 13/13, it_clipboard 9/9. Preview not exercised end to end.
+- [x] 11.8 Safe Undo Last Insertion
+  - Evidence: tests/test_undo.py 6/6; scripts/it_undo.py 11/11 (Notepad, Edge, Tk).
+- [x] 11.9 Regression, security, package, docs
+  - Evidence: see docs/testing.md "Flowbit v3.0.0 results"; bandit/pip-audit clean; dist\Flowbit\Flowbit.exe --selftest OK on GPU; README, formatting.md, windows-integration.md, status.md, privacy, architecture, GUIDE updated.

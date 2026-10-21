@@ -64,7 +64,7 @@ def fields(hwnd):
 
 
 before = set(wins())
-p = subprocess.Popen([exe, f"--user-data-dir={work / 'profile'}", "--no-first-run", "--no-default-browser-check",
+p = subprocess.Popen([exe, f"--user-data-dir={work / 'profile'}", "--no-first-run", "--no-default-browser-check", "--inprivate",
                       "--new-window", "--window-size=900,600", page.as_uri()])
 hwnd = None
 for _ in range(80):

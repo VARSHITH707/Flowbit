@@ -15,6 +15,7 @@ import win32con
 import win32gui
 
 from it_helpers import Target
+from it_learn_helpers import close_own_tab  # noqa: E402
 from voicetype import insertion as ins
 
 
@@ -87,7 +88,7 @@ with auto.UIAutomationInitializerInThread():
         ins.insert("hello from voicetype notepad", hwnd); time.sleep(0.6)
         print("Notepad:", read_focused())
         ins._send([(0x11, 0, 0), (0x53, 0, 0), (0x53, 0, 2), (0x11, 0, 2)]); time.sleep(0.8)
-        win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0); time.sleep(1)
+        close_own_tab(hwnd, path.name)  # never the whole window: it may hold the user's restored tabs
         path.unlink(missing_ok=True)
 
     # Edge textarea, isolated profile

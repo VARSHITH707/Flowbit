@@ -14,6 +14,7 @@ import win32con
 import win32gui
 import win32process
 
+from it_learn_helpers import close_own_tab  # noqa: E402
 from voicetype import insertion as ins
 
 path = Path(tempfile.gettempdir()) / "vt_np_test.txt"
@@ -126,7 +127,7 @@ try:
 finally:
     ins._send(CTRL_S)  # save once so closing shows no prompt
     time.sleep(0.8)
-    win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+    close_own_tab(hwnd, path.name)  # never the whole window: it may hold the user's restored tabs
     time.sleep(1.0)
     closed = hwnd not in notepads()
     print("our Notepad window closed:", closed)

@@ -1,4 +1,4 @@
-# Build the standalone VoiceType app (PyInstaller, one folder) into dist\VoiceType.
+# Build the standalone Flowbit app (PyInstaller, one folder) into dist\Flowbit.
 #   powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1            # GPU build (bundles NVIDIA cuBLAS/cuDNN, ~2.3 GB)
 #   powershell -ExecutionPolicy Bypass -File scripts\build_exe.ps1 -CpuOnly   # CPU build, much smaller
 # Models are NOT bundled: they are downloaded on first use into a models folder next to the .exe.
@@ -20,10 +20,14 @@ if ($LASTEXITCODE -ne 0) { uv pip install --python $py pip *> $null }
 if ($LASTEXITCODE -ne 0) { uv pip install --python $py pyinstaller }
 
 Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
-$args = @("-m", "PyInstaller", "--noconfirm", "--onedir", "--windowed", "--name", "VoiceType",
+New-Item -ItemType Directory -Force build | Out-Null
+# app icon: the mascot, drawn by the app's own code (no image files in the repo)
+& $py -c "from PySide6.QtGui import QGuiApplication; a = QGuiApplication([]); from voicetype.ui.mascot import mascot_icon; mascot_icon(256).pixmap(256, 256).save('build/flowbit.ico')"
+$args = @("-m", "PyInstaller", "--noconfirm", "--onedir", "--windowed", "--name", "Flowbit", "--icon", "$root\build\flowbit.ico",
           "--distpath", "dist", "--workpath", "build", "--specpath", "build",
           "--collect-all", "faster_whisper", "--collect-all", "ctranslate2", "--collect-all", "onnxruntime",
-          "--collect-all", "sounddevice", "--collect-all", "_sounddevice_data", "--paths", $root)
+          "--collect-all", "sounddevice", "--collect-all", "_sounddevice_data", "--collect-all", "uiautomation",
+          "--hidden-import", "comtypes.stream", "--paths", $root)
 if (-not $CpuOnly) {
     foreach ($lib in "cublas", "cudnn", "cuda_nvrtc") {
         $args += @("--add-binary", "$sp\nvidia\$lib\bin\*.dll;nvidia/$lib/bin")
@@ -32,5 +36,5 @@ if (-not $CpuOnly) {
 $args += "run_voicetype.py"
 & $py @args
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed ($LASTEXITCODE)" }
-$mb = [math]::Round((Get-ChildItem dist\VoiceType -Recurse | Measure-Object Length -Sum).Sum / 1MB)
-Write-Host "Built dist\VoiceType\VoiceType.exe ($mb MB)"
+$mb = [math]::Round((Get-ChildItem dist\Flowbit -Recurse | Measure-Object Length -Sum).Sum / 1MB)
+Write-Host "Built dist\Flowbit\Flowbit.exe ($mb MB)"

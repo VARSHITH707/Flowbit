@@ -15,7 +15,7 @@ from voicetype.config import Config
 from voicetype.history import History
 from voicetype.transcriber import Transcriber
 from voicetype.ui.main_window import MainWindow
-from voicetype.ui.pill import StatePill
+from voicetype.ui.mascot import Mascot
 from voicetype.ui.setup_dialog import SetupDialog
 from voicetype.ui.theme import apply_theme
 
@@ -60,9 +60,11 @@ for i in range(d.pages.count()):
     d.grab().save(str(out / f"light_setup_{i}.png"))
 d.close()
 apply_theme(app, "dark")
-p = StatePill()
+p = Mascot()
+p.configure(True, 1.0, True, None)
 for st, det in (("idle", ""), ("recording", ""), ("processing", ""), ("done", ""), ("failed", "Microphone unavailable")):
-    p.set_state(st, det)
+    p.set_state(st, det, "toggle")
     app.processEvents()
-    p.grab().save(str(out / f"pill_{st}.png"))
+    p.grab().save(str(out / f"mascot_{st}.png"))
+p.hide()
 print("saved", sorted(x.name for x in out.iterdir()))

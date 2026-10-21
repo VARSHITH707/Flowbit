@@ -1,8 +1,7 @@
-import os
 
 from PySide6.QtCore import QUrl, Signal
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QSpinBox, QVBoxLayout, QWidget)
 
 from .. import models
@@ -71,7 +70,7 @@ class SettingsPage(QWidget):
         self.policy = combo([("copy", "Copy to clipboard, do not paste"), ("insert_anyway", "Insert into the window that is focused now")], c.focus_policy)
         self._ai_controls(c)
         self.vocab = VocabEditor(c.vocab)
-        self.vocab_bias = QCheckBox("Also hint these words to the speech model (better for rare names, but it can occasionally add words that were not said)")
+        self.vocab_bias = QCheckBox("Also hint these words to the speech model (can add words; off is safer)")
         self.vocab_bias.setChecked(c.vocab_bias)
         self.hist_on = QCheckBox("Save transcripts to history")
         self.hist_on.setChecked(c.history_enabled)
@@ -85,13 +84,13 @@ class SettingsPage(QWidget):
     def _ai_controls(self, c):
         self.fmt = combo([("smart", "Smart Formatting: punctuation, lists, numbers, spoken commands"),
                           ("exact", "Exact Transcription: your words as recognised")], c.format_mode)
-        self.ai_cleanup = QCheckBox("Smart: also let the local AI remove fillers and self-corrections (\"2, actually 3\" -> \"3\")")
+        self.ai_cleanup = QCheckBox("Smart: local AI removes fillers and self-corrections")
         self.ai_cleanup.setChecked(c.ai_cleanup)
-        self.ai_punct = QCheckBox("Add missing punctuation to long run-on speech with the local AI (words are never changed)")
+        self.ai_punct = QCheckBox("Local AI adds missing punctuation (never changes your words)")
         self.ai_punct.setChecked(c.ai_punctuation)
-        self.numbers = QCheckBox("Smart: write numbers as digits where it fits (25, 3.5, 15%, $20, October 21)")
+        self.numbers = QCheckBox("Smart: numbers as digits (25, 3.5, 15%, $20)")
         self.numbers.setChecked(c.number_formatting)
-        self.commands = QCheckBox("Smart: obey spoken commands (new line, new paragraph, first point, bullet point, end list)")
+        self.commands = QCheckBox("Smart: spoken commands (new line, first point, bullet point)")
         self.commands.setChecked(c.spoken_commands)
         self.commands_exact = QCheckBox("Exact: also obey new line / new paragraph")
         self.commands_exact.setChecked(c.commands_in_exact)
@@ -100,7 +99,7 @@ class SettingsPage(QWidget):
         self.llm = QLineEdit(c.llm_model)
         self.llm.setAccessibleName("Local AI model (Ollama)")
         self.styles = {cat: combo([("formal", "Formal"), ("casual", "Casual")], c.styles.get(cat, "formal")) for cat in STYLE_LABELS}
-        self.learn = QCheckBox("Learn from my corrections (re-reads the text box after pasting, on this PC only)")
+        self.learn = QCheckBox("Learn from my corrections (reads the box Flowbit typed into)")
         self.learn.setChecked(c.learn_from_edits)
 
     def _build_layout(self):
@@ -124,7 +123,7 @@ class SettingsPage(QWidget):
                                            (None, self.motion), (None, self.reset_pos)]))
         lay.addWidget(group("Microphone", [("Input device", self.mic)]))
         lay.addWidget(group("Speech recognition", [("Model", self.model), ("Run on", self.device), ("Language", self.lang), ("Free GPU memory after", self.unload)]))
-        lay.addWidget(group("Hotkeys (e.g. ctrl+alt+d, ctrl+alt+space)", [(HOTKEY_LABELS[k], w) for k, w in self.keys.items()] + [("Mode", self.mode)]))
+        lay.addWidget(group("Shortcuts (e.g. ctrl+alt+d, ctrl+alt+t, ctrl+windows)", [(HOTKEY_LABELS[k], w) for k, w in self.keys.items()] + [("Mode", self.mode)]))
         lay.addWidget(group("Recording and insertion", [("Longest recording", self.maxsec), (None, self.silence), ("Pause length", self.silence_s), ("Speech level", self.silence_t), (None, self.auto_insert), (None, self.preview), ("Insert by", self.method), ("If focus changed", self.policy)]))
         lay.addWidget(group("Formatting", [("Mode", self.fmt), (None, self.numbers), (None, self.commands), (None, self.commands_exact),
                                            (None, self.ai_punct), (None, self.ai_cleanup), ("Local AI model (Ollama)", self.llm)]))

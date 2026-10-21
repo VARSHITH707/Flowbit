@@ -1,34 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="334" viewBox="0 0 760 334" role="img" aria-label="Automated tests passing, by version (higher is better)">
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="368" viewBox="0 0 760 368" role="img" aria-label="Automated tests passing, by version (higher is better)">
 <style>
 .s{fill:#fcfcfb}.t1{fill:#0b0b0b}.t2{fill:#52514e}.g{stroke:#e4e3df}.a{fill:#2a78d6}.b{fill:#85837d}
 @media (prefers-color-scheme:dark){.s{fill:#1a1a19}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.g{stroke:#3a3936}.a{fill:#3987e5}.b{fill:#6b6a66}}
 text{font-family:Segoe UI,Helvetica,Arial,sans-serif}
 </style>
-<rect class="s" width="760" height="334" rx="10"/>
+<rect class="s" width="760" height="368" rx="10"/>
 <text class="t1" x="18" y="28" font-size="15" font-weight="600">Automated tests passing, by version (higher is better)</text>
-<line class="g" x1="230" y1="38" x2="230" y2="320" stroke-width="1"/>
+<line class="g" x1="230" y1="38" x2="230" y2="354" stroke-width="1"/>
 <text class="t1" x="220" y="56" font-size="13" text-anchor="end">v1.0  (2026-10-20)</text>
-<path class="a" d="M230.0,44.0 h190.8 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-190.8 z"><title>v1.0: 54 tests</title></path>
-<text class="t2" x="430.7692307692308" y="55" font-size="12">54</text>
+<path class="a" d="M230.0,44.0 h118.5 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-118.5 z"><title>v1.0: 54 tests</title></path>
+<text class="t2" x="358.51612903225805" y="55" font-size="12">54</text>
 <text class="t1" x="220" y="90" font-size="13" text-anchor="end">v2.0  (2026-10-20)</text>
-<path class="a" d="M230.0,78.0 h381.9 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-381.9 z"><title>v2.0: 107 tests</title></path>
-<text class="t2" x="621.9316239316239" y="89" font-size="12">107</text>
+<path class="a" d="M230.0,78.0 h238.8 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-238.8 z"><title>v2.0: 107 tests</title></path>
+<text class="t2" x="478.76344086021504" y="89" font-size="12">107</text>
 <text class="t1" x="220" y="124" font-size="13" text-anchor="end">v2.0.1  (2026-10-21)</text>
-<path class="a" d="M230.0,112.0 h381.9 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-381.9 z"><title>v2.0.1: 107 tests</title></path>
-<text class="t2" x="621.9316239316239" y="123" font-size="12">107</text>
+<path class="a" d="M230.0,112.0 h238.8 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-238.8 z"><title>v2.0.1: 107 tests</title></path>
+<text class="t2" x="478.76344086021504" y="123" font-size="12">107</text>
 <text class="t1" x="220" y="158" font-size="13" text-anchor="end">v2.0.2  (2026-10-21)</text>
-<path class="a" d="M230.0,146.0 h385.5 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-385.5 z"><title>v2.0.2: 108 tests</title></path>
-<text class="t2" x="625.5384615384615" y="157" font-size="12">108</text>
+<path class="a" d="M230.0,146.0 h241.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-241.0 z"><title>v2.0.2: 108 tests</title></path>
+<text class="t2" x="481.0322580645161" y="157" font-size="12">108</text>
 <text class="t1" x="220" y="192" font-size="13" text-anchor="end">v2.0.4  (2026-10-21)</text>
-<path class="a" d="M230.0,180.0 h385.5 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-385.5 z"><title>v2.0.4: 108 tests</title></path>
-<text class="t2" x="625.5384615384615" y="191" font-size="12">108</text>
+<path class="a" d="M230.0,180.0 h241.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-241.0 z"><title>v2.0.4: 108 tests</title></path>
+<text class="t2" x="481.0322580645161" y="191" font-size="12">108</text>
 <text class="t1" x="220" y="226" font-size="13" text-anchor="end">v2.1.0  (2026-10-21)</text>
-<path class="a" d="M230.0,214.0 h396.4 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-396.4 z"><title>v2.1.0: 111 tests</title></path>
-<text class="t2" x="636.3589743589744" y="225" font-size="12">111</text>
+<path class="a" d="M230.0,214.0 h247.8 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-247.8 z"><title>v2.1.0: 111 tests</title></path>
+<text class="t2" x="487.8387096774194" y="225" font-size="12">111</text>
 <text class="t1" x="220" y="260" font-size="13" text-anchor="end">v2.2.0  (2026-10-21)</text>
-<path class="a" d="M230.0,248.0 h418.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-418.0 z"><title>v2.2.0: 117 tests</title></path>
-<text class="t2" x="658.0" y="259" font-size="12">117</text>
+<path class="a" d="M230.0,248.0 h261.5 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-261.5 z"><title>v2.2.0: 117 tests</title></path>
+<text class="t2" x="501.4516129032258" y="259" font-size="12">117</text>
 <text class="t1" x="220" y="294" font-size="13" text-anchor="end">v2.2.1  (2026-10-21)</text>
-<path class="a" d="M230.0,282.0 h418.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-418.0 z"><title>v2.2.1: 117 tests</title></path>
-<text class="t2" x="658.0" y="293" font-size="12">117</text>
+<path class="a" d="M230.0,282.0 h261.5 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-261.5 z"><title>v2.2.1: 117 tests</title></path>
+<text class="t2" x="501.4516129032258" y="293" font-size="12">117</text>
+<text class="t1" x="220" y="328" font-size="13" text-anchor="end">v3.0.0  (2026-10-21)</text>
+<path class="a" d="M230.0,316.0 h418.0 a4,4 0 0 1 4,4 v6.0 a4,4 0 0 1 -4,4 h-418.0 z"><title>v3.0.0: 186 tests</title></path>
+<text class="t2" x="658.0" y="327" font-size="12">186</text>
 </svg>

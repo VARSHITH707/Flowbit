@@ -17,7 +17,7 @@ import win32con
 import win32gui
 
 from it_helpers import Target
-from it_learn_helpers import SELECT_ALL, focus, focus_editor, notepads, read_box
+from it_learn_helpers import SELECT_ALL, close_own_tab, focus, focus_editor, notepads, read_box
 from voicetype import insertion as ins
 from voicetype import undo
 
@@ -84,7 +84,7 @@ try:
         focus(np_hwnd)
         ins._send([(0x11, 0, 0), (0x53, 0, 0), (0x53, 0, 2), (0x11, 0, 2)])  # Ctrl+S: our own temp file
         time.sleep(0.8)
-        win32gui.PostMessage(np_hwnd, win32con.WM_CLOSE, 0, 0)
+        close_own_tab(np_hwnd, path.name)  # never the whole window: it may hold the user's restored tabs
         time.sleep(1)
         path.unlink(missing_ok=True)
 
