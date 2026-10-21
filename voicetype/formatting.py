@@ -114,6 +114,7 @@ _CARD = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 _SUF = ["st", "nd", "rd"] + ["th"] * 7
 _N = {w: i + 1 for i, w in enumerate(_ORD)} | {w: i + 1 for i, w in enumerate(_ORDLY)} | {w: i + 1 for i, w in enumerate(_CARD)}
 _N |= {str(i): i for i in range(1, 11)} | {f"{i}{s}": i for i, s in zip(range(1, 11), _SUF)}
+_DIGIT_ORD = [f"{i}{s}" for i, s in zip(range(1, 11), _SUF)]  # Whisper writes spoken ordinals as digits
 _ORD_RE = "|".join(_ORD + [f"{i}{s}" for i, s in zip(range(1, 11), _SUF)])
 _NUM_RE = "|".join(_CARD + [str(i) for i in range(10, 0, -1)])
 _LEAD = r"(?:^|(?<=[.?!,;:\n])\s*|\s+(?:and\s+|then\s+)?)"  # a cue starts the text, follows punctuation, or a space
@@ -122,13 +123,14 @@ _CUE = re.compile(
     r"(?P<ord>" + _ORD_RE + r")\s+(?:point|item|step)"  # first point, 2nd item
     r"|(?:point|item|step|number)\s+(?P<num>" + _NUM_RE + r")(?![\w.,]\d)"  # point one, number 2
     r"|(?P<ordly>" + "|".join(_ORDLY) + r")"  # firstly, secondly
+    r"|(?P<seq>" + "|".join(_ORD + _DIGIT_ORD) + r")"  # 'first, biryani', '1st biryani', 'and 5th, buttermilk' (checked in _cues)
     r"|(?P<next>next|another)\s+(?:point|item|step)"  # next point
     r"|(?P<bullet>bullet point|next bullet|add a bullet|new bullet)"
     r"|(?P<numbered>numbered list)"
     r"|(?P<end>end (?:of )?(?:the )?list)"
     r")\b(?:\s+(?:is|was))?\s*[,.:;\-–]?\s*", re.I)
-_KINDS = ("ord", "num", "ordly", "next", "bullet", "numbered", "end")
-_NUMBERED = ("ord", "num", "ordly", "next", "numbered")
+_KINDS = ("ord", "num", "ordly", "seq", "next", "bullet", "numbered", "end")
+_NUMBERED = ("ord", "num", "ordly", "seq", "next", "numbered")
 
 
 def _item(s: str) -> str:
@@ -141,39 +143,57 @@ def _cues(text: str) -> list[dict]:
     out = []
     for m in _CUE.finditer(text):
         kind = next(k for k in _KINDS if m.group(k))
-        n = _N.get(m.group(kind).lower()) if kind in ("ord", "num", "ordly") else (1 if kind == "numbered" else None)
+        n = _N.get(m.group(kind).lower()) if kind in ("ord", "num", "ordly", "seq") else (1 if kind == "numbered" else None)
         prefix = text[:m.start("lead")] + m.group("lead")
-        # 'number one' / 'point two' mid-sentence ("our number one priority") is not a cue
-        if kind == "num" and not re.search(r"(?:^|[.?!,;:\n]|\band|\bthen)\s*$", prefix):
+        # 'number one' / 'point two' mid-sentence ("our number one priority") and 'the first time' are not cues
+        word_ordinal = kind == "seq" and not m.group("seq")[0].isdigit()
+        if word_ordinal and not re.match(r"\s*[,;:]", text[m.end("seq"):]):
+            continue  # a spoken-word ordinal is a list cue only with its comma ("first, biryani", not "first thing"); 1st, 2nd always are
+        if (kind == "num" or word_ordinal) and not re.search(r"(?:^|[.?!,;:\n]|\band|\bthen)\s*$", prefix, re.I):
             continue
         out.append({"kind": kind, "n": n, "start": m.start(), "end": m.end()})
     return out
 
 
+def _sequence(cues: list[dict]) -> list[dict]:
+    """The run of list items: it starts at 'first' (or 'numbered list') and each cue must count up
+    ('second', 'third', 'next point'). Gaps are fine ('third' then 'fifth'); counting back is not."""
+    run = []
+    for c in cues:
+        if not run:
+            if c["n"] == 1:
+                run.append(c)
+            continue
+        want = run[-1]["n"] + 1
+        n = c["n"] if c["n"] is not None else want
+        if n >= want:
+            run.append({**c, "n": n})
+    return run
+
+
 def lists(text: str) -> str:
-    """Explicit list cues -> one item per line. Numbered lists need a cue for item 1 ('first point', 'point one',
-    'firstly' or 'numbered list') and at least one more item cue; bullets need 'bullet point' at least twice."""
+    """Explicit list cues -> one item per line, renumbered 1..n. Numbered: 'first', 'second', 'third' ... (also
+    'first point', 'point one', 'next point', 'numbered list'), at least two items. Bullets: 'bullet point' at
+    least twice. 'end list' closes the list and the rest becomes a new paragraph. Ordinary sentences are untouched."""
     cues = _cues(text)
-    numbered = [c for c in cues if c["kind"] in _NUMBERED]
-    if numbered and numbered[0]["n"] == 1 and len(numbered) >= 2:
-        use = [c for c in cues if c["kind"] in _NUMBERED + ("end",)]
-    elif sum(c["kind"] == "bullet" for c in cues) >= 2:
-        use = [c for c in cues if c["kind"] in ("bullet", "end")]
+    seq = _sequence([c for c in cues if c["kind"] in _NUMBERED])
+    bullets = [c for c in cues if c["kind"] == "bullet"]
+    if len(seq) >= 2:
+        use, bullet = seq, False
+    elif len(bullets) >= 2:
+        use, bullet = bullets, True
     else:
         return text
-    while use and use[0]["kind"] == "end":
-        use = use[1:]
-    items, tail = [], ""
+    ends = [c for c in cues if c["kind"] == "end" and c["start"] >= use[-1]["end"]]
+    boundary = ends[0]["start"] if ends else len(text)
+    tail = text[ends[0]["end"]:].strip() if ends else ""
+    items = []
     for i, c in enumerate(use):
-        if c["kind"] == "end":
-            tail = text[c["end"]:].strip()
-            break
-        nxt = use[i + 1]["start"] if i + 1 < len(use) else len(text)
+        nxt = use[i + 1]["start"] if i + 1 < len(use) else boundary
         items.append(_item(text[c["end"]:nxt]))
     items = [x for x in items if x]
     if len(items) < 2:
         return text
-    bullet = use[0]["kind"] == "bullet"
     body = "\n".join(("- " if bullet else f"{i}. ") + x for i, x in enumerate(items, 1))
     intro = text[:use[0]["start"]].strip().rstrip(",;")
     if intro and intro[-1] not in ".?!:":

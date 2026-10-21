@@ -199,3 +199,12 @@
   - Evidence: tests/test_undo.py 6/6; scripts/it_undo.py 11/11 (Notepad, Edge, Tk).
 - [x] 11.9 Regression, security, package, docs
   - Evidence: see docs/testing.md "Flowbit v3.0.0 results"; bandit/pip-audit clean; dist\Flowbit\Flowbit.exe --selftest OK on GPU; README, formatting.md, windows-integration.md, status.md, privacy, architecture, GUIDE updated.
+
+## PHASE 12: Approved Flowbit logo, lists without "point" (2026-10-22)
+- [x] 12.1 Logo assets cut from the approved image (transparent background, mascot and wordmark)
+  - Evidence: scripts/make_brand_assets.py; voicetype/assets/flowbit_mascot.png and flowbit_wordmark.png; previewed on black.
+- [x] 12.2 Floating mascot, header, icons use the approved character
+  - Evidence: rendered each state (idle, recording, transcribing, done, error) and the home header; tests/test_indicator.py 8/8.
+- [x] 12.3 Plain ordinal lists ("first, biryani; second, dosa; third, egg roti; and fifth, buttermilk") and Whisper digit ordinals
+  - Evidence: tests/test_formatting.py 58/58; real spoken clip scripts/make_list_clips.ps1 through Whisper and Transcriber.format: correct list, with and without commas.
+- [~] 12.4 Full real-desktop mascot test (scripts/it_ui.py): 6/11 on this run. Another window took focus; the mascot alone keeps focus (checked per state). Re-run on an idle desktop.

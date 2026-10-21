@@ -14,10 +14,11 @@ import math
 import time
 
 from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QGuiApplication, QIcon, QPainter, QPainterPath, QPen, QPixmap, QRadialGradient
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QGuiApplication, QIcon, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import QMenu, QWidget
 
 from ..dictation import ACTIVE, DONE, FAILED, IDLE, INSERTING, PROCESSING, RECORDING
+from .brand import mascot_pixmap
 
 GWL_EXSTYLE, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW = -20, 0x08000000, 0x80
 ORANGE, BLACK, WHITE, BODY, EDGE = QColor("#FF7900"), QColor("#0B0B0B"), QColor("#F5F5F5"), QColor("#171717"), QColor("#2e2e2e")
@@ -43,144 +44,94 @@ def bob_offset(state: str, t: float, reduced: bool) -> float:
     return 0.0 if reduced or state != IDLE else 1.6 * math.sin(t * 1.7)
 
 
+def _sprite_rect(size: float) -> QRectF:
+    """The character sits in the middle of the square; the outer ring is kept for sound waves and badges."""
+    w = size * 0.7
+    h = w * 263 / 256  # proportions of the approved mascot image
+    return QRectF((size - w) / 2, size * 0.1 + (size * 0.8 - h) / 2, w, h)
+
+
+def _draw_sprite(p: QPainter, size: float, opacity: float = 1.0) -> None:
+    pm = mascot_pixmap()
+    p.setOpacity(opacity)
+    if pm is not None:
+        p.drawPixmap(_sprite_rect(size), pm, QRectF(pm.rect()))
+    else:  # image missing: a plain round shape, so something still shows
+        p.setPen(QPen(ORANGE, max(1.0, size * 0.04)))
+        p.setBrush(BODY)
+        p.drawRoundedRect(_sprite_rect(size), size * 0.3, size * 0.3)
+    p.setOpacity(1.0)
+
+
 def paint_mascot(p: QPainter, x: float, y: float, size: float, state: str, t: float, level: float = 0.0,
                  reduced: bool = False) -> None:
-    """Draw the mascot into the square (x, y, size). Pure drawing: usable for the window, tray and app icons."""
-    u = size / 56.0
+    """Draw the approved Flowbit character into the square (x, y, size), with state marks.
+    Idle: dimmed and floating gently. Recording: full colour, sound waves follow your voice. Working: an orange
+    ring turns. Done / error: a check or a '!' badge. Pure drawing: also used for icons and for the tests."""
     p.save()
-    p.translate(x, y + bob_offset(state, t, reduced) * u)
+    p.translate(x, y + bob_offset(state, t, reduced) * size / 56.0)
     p.setRenderHint(QPainter.Antialiasing)
-    active = state in ACTIVE
-    accent = QColor(ORANGE)
-    if state == IDLE:
-        accent.setAlpha(110)
-    cx, cy = 28 * u, 24 * u
-    # glow behind the body: bright while recording (pulses with the voice), soft while working
-    if state == RECORDING or state in (PROCESSING, INSERTING):
-        g = QRadialGradient(QPointF(cx, cy), 27 * u)
-        a = int(70 + 120 * wave_strength(state, level)) if state == RECORDING else 70
-        c0 = QColor(ORANGE)
-        c0.setAlpha(a)
-        c1 = QColor(ORANGE)
-        c1.setAlpha(0)
-        g.setColorAt(0.0, c0)
-        g.setColorAt(1.0, c1)
-        p.setPen(Qt.NoPen)
-        p.setBrush(g)
-        p.drawEllipse(QPointF(cx, cy), 27 * u, 27 * u)
-    # stand
-    p.setPen(Qt.NoPen)
-    p.setBrush(QColor("#3a3a3a"))
-    p.drawRect(QRectF(26.8 * u, 43 * u, 2.4 * u, 7 * u))
-    p.drawRoundedRect(QRectF(19 * u, 49.5 * u, 18 * u, 3.6 * u), 1.8 * u, 1.8 * u)
-    # body: a rounded microphone head
-    p.setBrush(BODY)
-    p.setPen(QPen(ORANGE if active else EDGE, (2.2 if active else 1.4) * u))
-    p.drawRoundedRect(QRectF(10 * u, 4 * u, 36 * u, 40 * u), 17 * u, 17 * u)
-    # grille
-    p.setPen(_pen(accent if active else QColor("#303030"), 1.3 * u))
-    for i, w in enumerate((10, 14, 10)):
-        yy = (10 + i * 3.2) * u
-        p.drawLine(QPointF(cx - w / 2 * u, yy), QPointF(cx + w / 2 * u, yy))
-    # cheeks
-    blush = QColor(ORANGE)
-    blush.setAlpha(150 if active or state == DONE else 70)
-    p.setPen(Qt.NoPen)
-    p.setBrush(blush)
-    for bx in (17.5, 38.5):
-        p.drawEllipse(QPointF(bx * u, 31.5 * u), 2.4 * u, 1.6 * u)
-    _face(p, u, state, t, level, reduced)
+    _draw_sprite(p, size, opacity=0.45 if state == IDLE else 1.0)
     if state == RECORDING:
-        _waves(p, u, cx, cy, t, level)
+        _waves(p, size, t, level)
     elif state in (PROCESSING, INSERTING):
-        _spinner(p, u, cx, cy, t, reduced)
+        _spinner(p, size, t, reduced)
     elif state == DONE:
-        _badge(p, u, ORANGE, "check")
+        _badge(p, size, ORANGE, "check")
     elif state == FAILED:
-        _badge(p, u, QColor("#ffb547"), "!")
+        _badge(p, size, QColor("#ffb547"), "!")
     p.restore()
 
 
-def _face(p: QPainter, u: float, state: str, t: float, level: float, reduced: bool) -> None:
-    p.setPen(Qt.NoPen)
-    p.setBrush(WHITE if state != IDLE else QColor("#d9d9d9"))
-    look = 2.0 * math.sin(t * 3.2) if state in (PROCESSING, INSERTING) and not reduced else 0.0
-    blink = state == IDLE and not reduced and (t % 4.2) < 0.13
-    if state == DONE:  # happy ^ ^
-        p.setPen(_pen(WHITE, 1.8 * u))
-        p.setBrush(Qt.NoBrush)
-        for ex in (22, 34):
-            path = QPainterPath(QPointF((ex - 3) * u, 25 * u))
-            path.quadTo(QPointF(ex * u, 20.5 * u), QPointF((ex + 3) * u, 25 * u))
-            p.drawPath(path)
-    else:
-        h = 1.2 if blink else (7.5 if state == RECORDING else 6.5)
-        w = 4.6 if state != FAILED else 4.0
-        for ex in (22, 34):
-            p.drawRoundedRect(QRectF((ex - w / 2 + look) * u, (24 - h / 2) * u, w * u, h * u), w / 2 * u, w / 2 * u)
-    # mouth
-    if state == RECORDING:  # opens with the voice
-        open_h = 1.8 + min(1.0, level * 6) * 4.5
-        p.setPen(Qt.NoPen)
-        p.setBrush(ORANGE)
-        p.drawRoundedRect(QRectF(25.2 * u, (34 - open_h / 2) * u, 5.6 * u, open_h * u), 2.6 * u, 2.6 * u)
-        return
-    p.setBrush(Qt.NoBrush)
-    p.setPen(_pen(WHITE if state != IDLE else QColor("#bdbdbd"), 1.6 * u))
-    if state == FAILED:
-        p.drawLine(QPointF(25 * u, 35 * u), QPointF(31 * u, 34 * u))
-        return
-    depth = 4.2 if state == DONE else 2.6
-    path = QPainterPath(QPointF(24 * u, 33 * u))
-    path.quadTo(QPointF(28 * u, (33 + depth) * u), QPointF(32 * u, 33 * u))
-    p.drawPath(path)
-
-
-def _waves(p: QPainter, u: float, cx: float, cy: float, t: float, level: float) -> None:
+def _waves(p: QPainter, size: float, t: float, level: float) -> None:
     s = wave_strength(RECORDING, level)
-    for i, r in enumerate((24, 29)):
+    cx, cy = size / 2, size / 2
+    for i, k in enumerate((0.47, 0.5)):
         c = QColor(ORANGE)
         c.setAlpha(int(255 * s * (1.0 if i == 0 else 0.6) * (0.75 + 0.25 * math.sin(t * 9 + i))))
-        p.setPen(_pen(c, 2.2 * u))
+        p.setPen(_pen(c, max(1.5, size * 0.04)))
         p.setBrush(Qt.NoBrush)
+        r = size * k
         span = 50 + 25 * s
-        rect = QRectF(cx - r * u, cy - r * u, 2 * r * u, 2 * r * u)
+        rect = QRectF(cx - r, cy - r, 2 * r, 2 * r)
         p.drawArc(rect, int(-span / 2 * 16), int(span * 16))  # right side
         p.drawArc(rect, int((180 - span / 2) * 16), int(span * 16))  # left side
 
 
-def _spinner(p: QPainter, u: float, cx: float, cy: float, t: float, reduced: bool) -> None:
+def _spinner(p: QPainter, size: float, t: float, reduced: bool) -> None:
     c = QColor(ORANGE)
-    c.setAlpha(220)
-    p.setPen(_pen(c, 2.2 * u))
+    c.setAlpha(230)
+    p.setPen(_pen(c, max(1.5, size * 0.04)))
     p.setBrush(Qt.NoBrush)
     start = 0 if reduced else -(t * 300) % 360
-    p.drawArc(QRectF(cx - 25 * u, cy - 25 * u, 50 * u, 50 * u), int(start * 16), int(80 * 16))
+    r = size * 0.47
+    p.drawArc(QRectF(size / 2 - r, size / 2 - r, 2 * r, 2 * r), int(start * 16), int(80 * 16))
 
 
-def _badge(p: QPainter, u: float, color: QColor, kind: str) -> None:
+def _badge(p: QPainter, size: float, color: QColor, kind: str) -> None:
+    cx, cy, r = size * 0.84, size * 0.16, size * 0.13
     p.setPen(Qt.NoPen)
     p.setBrush(color)
-    center = QPointF(44 * u, 8 * u)
-    p.drawEllipse(center, 6 * u, 6 * u)
-    p.setPen(_pen(BLACK, 1.8 * u))
+    p.drawEllipse(QPointF(cx, cy), r, r)
+    p.setPen(_pen(BLACK, max(1.5, size * 0.05)))
+    p.setBrush(Qt.NoBrush)
     if kind == "check":
-        path = QPainterPath(QPointF(41 * u, 8 * u))
-        path.lineTo(QPointF(43.3 * u, 10.3 * u))
-        path.lineTo(QPointF(47 * u, 5.8 * u))
-        p.setBrush(Qt.NoBrush)
+        path = QPainterPath(QPointF(cx - r * 0.5, cy))
+        path.lineTo(QPointF(cx - r * 0.1, cy + r * 0.4))
+        path.lineTo(QPointF(cx + r * 0.55, cy - r * 0.4))
         p.drawPath(path)
     else:
-        p.drawLine(QPointF(44 * u, 4.8 * u), QPointF(44 * u, 8.8 * u))
-        p.drawPoint(QPointF(44 * u, 11.2 * u))
+        p.drawLine(QPointF(cx, cy - r * 0.55), QPointF(cx, cy + r * 0.15))
+        p.drawPoint(QPointF(cx, cy + r * 0.5))
 
 
-def mascot_icon(size: int = 64, state: str = DONE) -> QIcon:
-    """App / tray icon: the mascot on transparent background."""
+def mascot_icon(size: int = 64) -> QIcon:
+    """App and tray icon: the Flowbit character in full colour on a transparent background."""
     pm = QPixmap(size, size)
     pm.fill(Qt.transparent)
     p = QPainter(pm)
-    paint_mascot(p, 0, 0, size, state, 0.0, reduced=True)
+    p.setRenderHint(QPainter.Antialiasing)
+    _draw_sprite(p, size)
     p.end()
     return QIcon(pm)
 

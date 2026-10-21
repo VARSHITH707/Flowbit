@@ -5,9 +5,9 @@ from PySide6.QtGui import QGuiApplication
 BRAND = dict(black="#0B0B0B", orange="#FF7900", white="#F5F5F5")
 PALETTES = {
     "dark": dict(bg=BRAND["black"], panel="#151515", text=BRAND["white"], muted="#a8a8a8", accent=BRAND["orange"],
-                 border="#2a2a2a", good="#3ecf8e", bad="#ff5c5c", warn="#ffb547", input="#1c1c1c", on_accent="#0B0B0B"),
+                 border="#2a2a2a", good="#3ecf8e", bad="#ff5c5c", warn="#ffb547", input="#1c1c1c", on_accent="#0B0B0B", accent_hover="#ff9a3d"),
     "light": dict(bg="#fafafa", panel="#ffffff", text="#141414", muted="#5c5c5c", accent="#b35000", border="#dadada",
-                  good="#0f8a4f", bad="#c62828", warn="#9a5b00", input="#ffffff", on_accent="#ffffff"),
+                  good="#0f8a4f", bad="#c62828", warn="#9a5b00", input="#ffffff", on_accent="#ffffff", accent_hover="#e06a00"),
 }
 
 _QSS = """
@@ -27,6 +27,7 @@ QPushButton:hover {{ border-color: {accent}; }}
 QPushButton:focus {{ border: 2px solid {accent}; }}
 QPushButton:disabled {{ color: {muted}; }}
 QPushButton#primary {{ background: {accent}; color: {on_accent}; border: none; font-weight: 600; }}
+QPushButton#primary:hover {{ background: {accent_hover}; border: none; }}
 QPushButton#primary:disabled {{ background: {border}; color: {muted}; }}
 QPushButton#danger {{ color: {bad}; }}
 QLineEdit, QComboBox, QSpinBox, QTextEdit, QPlainTextEdit, QListWidget, QTableWidget {{

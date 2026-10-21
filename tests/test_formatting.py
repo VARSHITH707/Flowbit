@@ -170,3 +170,32 @@ def test_smart_formatting_never_drops_content_words():
     out = smart(raw)
     strip = lambda s: [w.strip(".,?!:").lower() for w in s.split()]  # noqa: E731
     assert strip(out) == strip(raw)
+
+
+# ---- plain ordinals without the word "point" (the user's menu example)
+def test_plain_ordinal_items_become_a_numbered_list():
+    assert smart("first, biryani; second, dosa; third, egg roti; and fifth, buttermilk") == \
+        "1. Biryani.\n2. Dosa.\n3. Egg roti.\n4. Buttermilk."
+    assert smart("First, biryani. Second, dosa. Third, egg roti. And fifth, buttermilk.") == \
+        "1. Biryani.\n2. Dosa.\n3. Egg roti.\n4. Buttermilk."  # renumbered 1..n, the spoken 'fifth' is item 4
+
+
+def test_whisper_digit_ordinals_are_list_cues():
+    assert smart("1st, biryani. 2nd, dosa. 3rd, eggo tea. And 5th, buttermilk.") == \
+        "1. Biryani.\n2. Dosa.\n3. Eggo tea.\n4. Buttermilk."
+    assert smart("1st biryani 2nd dosa 3rd egg roti and 5th buttermilk.") == \
+        "1. Biryani.\n2. Dosa.\n3. Egg roti.\n4. Buttermilk."  # no commas at all
+
+
+def test_list_after_an_intro_keeps_the_intro():
+    assert smart("We are ordering. First, biryani. Second, dosa.") == "We are ordering.\n1. Biryani.\n2. Dosa."
+
+
+@pytest.mark.parametrize("raw", [
+    "Dinner was nice. Then, first thing tomorrow, we leave. Second, we rest.",  # 'first thing' is prose, no comma
+    "The first time we met was in 2019.",
+    "I went for a second opinion first thing in the morning.",
+    "First we need a plan.",  # one cue only
+])
+def test_ordinary_speech_with_first_and_second_stays_prose(raw):
+    assert "\n" not in smart(raw)

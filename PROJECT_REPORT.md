@@ -5,7 +5,7 @@
 | Project | VoiceType, a private voice-typing app for Windows 11 (local replacement for Wispr Flow) |
 | Location | Everything in `Z:\Wispr Flow`: code, `userdata\` (history, settings, memory, log), `models\` (speech models). Nothing on C: |
 | Machine | Windows 11 laptop, RTX 4060 Laptop GPU (8 GB), Python 3.11 |
-| Current version | **v3.0.0 Flowbit** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
+| Current version | **v3.1.0 Flowbit** (see [VERSION_HISTORY.md](VERSION_HISTORY.md)) |
 | Repository | https://github.com/VARSHITH707/Unlimited-WisprFlow (public, MIT license) |
 | Status | Working on this machine; first hands-on test passed. Next: improve and fine-tune the models |
 | Last updated | 2026-10-21 |

@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v3.1.0](#v310--2026-10-22) | 2026-10-22 | Approved Flowbit logo and mascot, numbered lists from plain ordinals |
 | [v3.0.0](#v300--2026-10-21) | 2026-10-21 | **Flowbit**: formatting pipeline, mascot, safe undo, shortcut checks |
 | [v2.2.1](#v221--2026-10-21) | 2026-10-21 | Fine-tuning pipeline verified end to end; data moved off C |
 | [v2.2.0](#v220--2026-10-21) | 2026-10-21 | Moving logo while recording, dashboard, new README, fine-tuning scripts |
@@ -16,6 +17,32 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v3.1.0 · 2026-10-22
+**Theme:** Use the approved Flowbit logo, and fix lists spoken without the word "point".
+**Why:** Dictated lists such as "first, biryani; second, dosa; third, egg roti; and fifth, buttermilk" came out as one paragraph. The mascot and header used my drawn placeholder.
+
+### Changed
+- **List detection:** ordinal words at a clause start count as list cues when followed by a comma ("first, biryani", "and fifth, buttermilk"). Digit ordinals that Whisper writes ("1st biryani 2nd dosa") count too. The list is renumbered 1..n.
+- **Ordinary speech is still prose:** "the first time we met", "first thing tomorrow" and "our number one priority" are not lists.
+- **Logo:** the mascot and the Flowbit wordmark are cut from the approved image (`scripts/make_brand_assets.py`, committed in `voicetype/assets`).
+- **Floating mascot:** uses the approved character. Dimmed when idle; the waves, a turning ring, a check and a "!" badge are drawn on top.
+- **Home screen:** shows the wordmark instead of the text heading. The orange button brightens on hover.
+- **App and tray icon:** the mascot.
+- **Package:** `build_exe.ps1` now includes the logo files (before, the .exe would have shown the fallback shape).
+
+### Tested
+- 193 automated tests pass (+7: plain-ordinal lists, digit ordinals, prose traps).
+- Your list example, spoken through the text-to-speech voice and run through the real Whisper pipeline: `1. Biryani` / `2. Dosa` / `3. Egg roti` / `4. Buttermilk`. Without commas: the same result.
+- Earlier spoken clips (list, bullets, commands, numbers, run-on plan): unchanged.
+- The mascot alone never takes the foreground (checked state by state).
+- **Not complete:** the full real-desktop mascot test scored 6/11. Another window (the Claude app) took focus partway through, and the clicks did not land. That run is not a pass; it needs a quiet desktop.
+
+### Still open at v3.1.0
+- Whisper heard "egg roti" as "eggo tea" in a synthetic voice. Custom vocabulary fixes that per word.
+- The 1st and 2nd digit forms also count in prose, e.g. "the 1st time we met, and the 2nd day was rainy" (rare).
 
 ---
 

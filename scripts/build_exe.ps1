@@ -27,7 +27,7 @@ $args = @("-m", "PyInstaller", "--noconfirm", "--onedir", "--windowed", "--name"
           "--distpath", "dist", "--workpath", "build", "--specpath", "build",
           "--collect-all", "faster_whisper", "--collect-all", "ctranslate2", "--collect-all", "onnxruntime",
           "--collect-all", "sounddevice", "--collect-all", "_sounddevice_data", "--collect-all", "uiautomation",
-          "--hidden-import", "comtypes.stream", "--paths", $root)
+          "--hidden-import", "comtypes.stream", "--add-data", "$root\voicetype\assets;voicetype/assets", "--paths", $root)
 if (-not $CpuOnly) {
     foreach ($lib in "cublas", "cudnn", "cuda_nvrtc") {
         $args += @("--add-binary", "$sp\nvidia\$lib\bin\*.dll;nvidia/$lib/bin")
