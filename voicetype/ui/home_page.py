@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import QApplication, QFrame, QHBoxLayout, QLabel, QPushButton, QTextEdit, QVBoxLayout, QWidget
 
 from ..dictation import ACTIVE, DONE, FAILED, IDLE, INSERTING, PROCESSING, RECORDING
-from .brand import wordmark_pixmap
+from .brand import logo_pixmap
 
 STATE_TEXT = {IDLE: "Ready", RECORDING: "Listening", PROCESSING: "Transcribing...", INSERTING: "Inserting...", DONE: "Done",
               FAILED: "Something went wrong"}
@@ -35,9 +35,9 @@ class HomePage(QWidget):
         super().__init__()
         self.h = cfg_holder
         self.title = QLabel("Flowbit", objectName="title")
-        wordmark = wordmark_pixmap()  # the approved logo; the text is only the fallback
-        if wordmark is not None:
-            self.title.setPixmap(wordmark.scaledToHeight(46, Qt.SmoothTransformation))
+        logo = logo_pixmap()  # the ghost logo; the text is only the fallback
+        if logo is not None:
+            self.title.setPixmap(logo.scaledToHeight(64, Qt.SmoothTransformation))
         self.status = QLabel(STATE_TEXT[IDLE], objectName="title")
         self.info = QLabel("", objectName="muted")
         self.privacy = QLabel(PRIVACY, objectName="muted")

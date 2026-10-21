@@ -2,6 +2,7 @@
 UI-agnostic (callbacks). One session at a time: duplicate starts, stops and late results are ignored."""
 import logging
 import threading
+import time
 from dataclasses import dataclass
 
 from . import insertion
@@ -39,6 +40,7 @@ class Dictation:
         self._rec = None
         self._target = 0
         self._gen = 0  # bumped by cancel; a stale worker must not insert
+        self._stopped_at = 0.0  # when the last recording stopped: start of the stop-to-insert timing
 
     def _set(self, state, detail="") -> None:
         self.state = state
@@ -72,6 +74,7 @@ class Dictation:
         with self._lock:
             if self.state != RECORDING:
                 return
+            self._stopped_at = time.perf_counter()
             audio = self._rec.stop()
             self._rec = None
             if len(audio) < self.s.min_seconds * 16000:
@@ -96,6 +99,7 @@ class Dictation:
                 self._set(IDLE, "Cancelled.")
 
     def _work(self, audio, gen, target) -> None:
+        t_stop = self._stopped_at
         try:
             res = self.get_engine().transcribe(audio, language=self.s.language, category=self._categorize(target))
         except Exception as e:  # TranscribeError or engine load failure: never insert on failure
@@ -107,12 +111,15 @@ class Dictation:
             return
         self.last_target = target
         note = getattr(self, "_auto_note", "")
+        log.info("timing (s): recording=%.2f asr=%.3f", res.duration, res.seconds)
         if self.s.auto_insert:
             with self._lock:
                 if gen != self._gen or self.state != PROCESSING:  # cancelled or already finalised: never insert twice
                     return
                 self._set(INSERTING)
+            t_ins = time.perf_counter()
             ins = self._insert(res.text, target)
+            log.info("timing (s): insert=%.3f stop_to_insert=%.3f", time.perf_counter() - t_ins, time.perf_counter() - t_stop)
             if gen != self._gen:
                 return
             if ins.status != "inserted":

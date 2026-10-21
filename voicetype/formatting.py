@@ -15,11 +15,14 @@ PAUSE_SENTENCE_S = 0.8  # a gap this long between recognised segments ends a sen
 # ---------------------------------------------------------------- segments and spacing
 def join_segments(segments) -> str:
     """Join recognised segments [(start_s, end_s, text)]. A long pause before a capitalised segment ends the
-    previous sentence if Whisper did not; otherwise segments are joined with one space (never mechanically)."""
+    previous sentence if Whisper did not; otherwise segments are joined with one space (never mechanically).
+    Words that Whisper repeated at the start of a segment, because the two segments overlapped, are dropped."""
     out = ""
     prev_end = None
     for start, end, text in segments:
         t = " ".join(text.split())
+        if out and t:
+            t = _drop_overlap(out, t)
         if not t:
             continue
         if out:
@@ -30,6 +33,50 @@ def join_segments(segments) -> str:
         out += t
         prev_end = end
     return out
+
+
+OVERLAP_MAX_WORDS = 4
+
+
+def _drop_overlap(previous: str, segment: str) -> str:
+    """Remove the first words of `segment` when they repeat the last words of `previous` (overlapping segments)."""
+    prev = previous.split()
+    words = segment.split()
+    for k in range(min(OVERLAP_MAX_WORDS, len(prev), len(words)), 0, -1):
+        if [w.lower().strip(".,?!") for w in prev[-k:]] == [w.lower().strip(".,?!") for w in words[:k]]:
+            if k == 1 and words[0].lower().strip(".,?!") in INTENTIONAL:
+                return segment  # a single intentional word ("very" very) is not an overlap
+            return " ".join(words[k:])
+    return segment
+
+
+# Words people often say twice on purpose. Anything else said twice in a row is an accidental repeat.
+INTENTIONAL = {"very", "really", "so", "no", "yes", "bye", "ha", "hah", "hey", "hi", "ok", "okay", "go", "little", "much",
+               "more", "long", "far", "ever", "quite", "nah", "wow", "oh", "ah", "aha", "fine", "well", "hard", "fast",
+               "ya", "mm", "uh", "um", "tick", "tock", "bam", "boom", "knock", "ding", "dong",
+               "had", "that"}  # grammatical doubles: "we had had enough", "that that"
+_WORD = re.compile(r"[A-Za-z][A-Za-z']*")
+
+
+def remove_repeats(text: str) -> str:
+    """'I I want to build this' -> 'I want to build this'; 'the app app is slow' -> 'the app is slow'.
+    Only a word repeated immediately, not in INTENTIONAL, loses its extra copies. Digits, names with different
+    spellings, and repeats separated by other words are never touched. Phrase repeats are left alone (too risky)."""
+    out, last = [], None
+    pos = 0
+    for m in re.finditer(r"\S+", text):
+        token = m.group(0)
+        core = _WORD.fullmatch(token.strip(".,?!;:\"'")) and token.strip(".,?!;:\"'").lower()
+        gap = text[pos:m.start()]
+        pos = m.end()
+        if core and core == last and core not in INTENTIONAL:
+            # drop this copy; keep any punctuation the copy carried onto the kept word
+            if token[-1:] in ".,?!;:" and out and out[-1][-1:] != token[-1:]:
+                out[-1] = out[-1] + token[-1]
+            continue
+        out.append(gap + token if out else token)
+        last = core
+    return "".join(out)
 
 
 _SPACE_BEFORE = re.compile(r"[ \t]+([,.?!;:%)\]])")

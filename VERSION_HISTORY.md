@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v3.2.0](#v320--2026-10-22) | 2026-10-22 | Ghost mascot and logo, blinking eyes, fixed window position, accidental-repeat cleanup, stage timings |
 | [v3.1.2](#v312--2026-10-22) | 2026-10-22 | Mascot made visible on dark desktops (backdrop, idle brighter) |
 | [v3.1.1](#v311--2026-10-22) | 2026-10-22 | Old icons and unused files removed; packaged app installed |
 | [v3.1.0](#v310--2026-10-22) | 2026-10-22 | Approved Flowbit logo and mascot, numbered lists from plain ordinals |
@@ -19,6 +20,35 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v3.2.0 · 2026-10-22
+**Theme:** The ghost mascot, a logo that is only the character, blinking eyes, a mascot that stays where you put it, and cleaner text.
+
+### Root causes found
+- **The mascot moved:** every change of status text resized and moved the window (the speech bubble changes width, and it could flip to the other side of the mascot). Fixed: the window has a fixed size and is placed only at start-up, after a drag, when settings change, or when a display is added or removed.
+- **Transcription got slower:** measured on real speech. Speech recognition takes 0.4 to 0.7 s; the local AI cleanup takes 0.4 to 1.3 s and is almost all of the total; the rule-based steps take about 1 ms. The AI cleanup is the default in Smart mode. It is not changed here, because it trades speed for accuracy. Tell me if you want it off by default.
+
+### Changed
+- **Mascot:** the ghost-shaped character from the reference image, with the background removed. Edge-connected dark glow is removed, so no black corners remain. Alpha was verified by measurement.
+- **Blinking:** the eyes close about every 3.5 to 6.5 seconds for 0.2 s, with a smooth ease. Off in reduced motion. Blinking runs only in the window; it does not move anything.
+- **Logo:** the ghost alone, with no name. Files: `voicetype/assets/flowbit-logo.png` and `.svg`. The app header shows the ghost too.
+- **Icons:** `flowbit-mascot.png` (512 px), `flowbit-icon.png` (256 px), vector `flowbit-mascot.svg`.
+- **Clicks:** outside the mascot and its bubble, the window does not take clicks, so apps underneath keep working.
+- **Repeats:** a word said twice in a row is reduced to one ("I I want" becomes "I want"). Intentional doubles are kept ("very very", "ha ha", "had had", "that that"). A repeated word at the join of two overlapping segments is removed once.
+- **Timings:** each dictation logs the stage times (numbers only, never your text): recording length, speech time, repeat cleanup, AI cleanup, rules, insertion, and stop-to-insert total.
+
+### Removed
+- `flowbit_mascot.png`, `flowbit_wordmark.png` and `scripts/make_brand_assets.py` (replaced by the ghost assets).
+
+### Tested
+- 214 automated tests pass, including: the window never moves when the status changes; clicks pass through outside the mascot; blink curve; eye boxes; repeats (accidental and intentional); overlap at segment joins.
+- Real speech through the full pipeline: stage timings above.
+
+### Still open at v3.2.0
+- Grammar correction beyond repeats and punctuation is not done (it would need a language model; the local AI step already covers some of it).
+- The packaged app and the desktop check are not yet re-verified for this build.
 
 ---
 

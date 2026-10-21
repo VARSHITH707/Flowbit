@@ -216,3 +216,21 @@
   - Evidence: `Flowbit.exe --selftest` exit 0, correct list text, cuda; `Flowbit.exe --quit-after 9000` exit after the timer (log shows "shutting down").
 - [x] 13.3 Desktop and Start Menu shortcut to dist\Flowbit\Flowbit.exe
   - Evidence: shortcuts created with the packaged icon; Wispr Flow shortcuts left untouched.
+
+## PHASE 14: Ghost mascot, blink, fixed position, text cleanup (2026-10-22)
+- [x] 14.1 Ghost mascot from the reference; alpha verified (corners 0, edge-connected dark glow removed); eye boxes measured
+  - Evidence: scripts/make_ghost_assets.py output; voicetype/assets/flowbit-mascot.png 512x506, flowbit-icon.png 256, flowbit-logo.png; flowbit-mascot.json eyes.
+- [x] 14.2 Logo is the ghost only, without the name (SVG and PNG)
+- [x] 14.3 Blinking: restrained, smooth, off in reduced motion
+  - Evidence: tests/test_indicator.py blink curve and eye boxes; mascot only redraws while blinking or working.
+- [x] 14.4 Window movement root cause fixed: fixed window size; place only at start-up, drag, settings change, display change
+  - Evidence: tests/test_indicator.py test_window_size_is_fixed_and_state_changes_never_move_it, test_bubble_side_flips_only_at_placement_not_per_state.
+- [x] 14.5 Clicks pass through outside the mascot and bubble (window mask)
+  - Evidence: tests/test_indicator.py test_only_the_mascot_and_its_bubble_take_clicks.
+- [x] 14.6 Slowdown measured: ASR 0.4-0.7 s, AI cleanup 0.4-1.3 s (main cost), rules ~1 ms. Default unchanged; user to decide.
+- [x] 14.7 Accidental repeats removed; intentional doubles kept; overlap at segment joins removed
+  - Evidence: tests/test_repeats.py (18 cases).
+- [x] 14.8 Stage timings logged (numbers only)
+  - Evidence: dictation.py and transcriber.py log lines "timing (s)" and "format timing (s)".
+- [ ] 14.9 Grammar correction beyond repeats/punctuation: not done (needs a language model; out of scope for this step)
+- [ ] 14.10 Packaged app re-checked on the desktop for this build

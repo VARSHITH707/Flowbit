@@ -63,25 +63,36 @@ class Transcriber:
                 change any word). Smart: fillers removed, optional AI cleanup, then the deterministic formatter
                 (lists, numbers, commands, capitals, sentence ends). Your vocabulary is applied last, so it wins."""
         vocab = list(cfg.vocab) + memory.vocab_entries()  # your words + words learned from your corrections
-        note, used_ai = "", False
+        note, used_ai, timing = "", False, {}
         if cfg.format_mode == "exact":
             text = formatting.format_exact(raw)
             if cfg.commands_in_exact:
                 text = formatting.normalize_spacing(formatting.spoken_commands(text))
         else:
+            t0 = time.perf_counter()
             text = textproc.clean(textproc.apply_vocab(raw, vocab))  # your spellings reach the AI already fixed
+            text = formatting.remove_repeats(text)  # "I I want" -> "I want", before anything else sees it
+            timing["repeats"] = time.perf_counter() - t0
             if cfg.spoken_commands:  # explicit cues first, so the AI receives (and keeps) the finished structure
                 text = formatting.lists(formatting.spoken_commands(text))
             style = cfg.styles.get(category, "formal")
             if cfg.ai_cleanup and text.strip():
                 terms = tuple(dict.fromkeys(w for _, w in textproc.parse_vocab(vocab)))
+                t1 = time.perf_counter()
                 c = cleanup.clean(text, cfg.llm_model, style=style, terms=terms, examples=tuple(memory.examples()))
+                timing["ai_cleanup"] = time.perf_counter() - t1
                 text, note, used_ai = formatting.keep_line_breaks(text, c.text), c.note, c.used_llm
         if cfg.ai_punctuation and not used_ai and cleanup.needs_punctuation(text):
+            t2 = time.perf_counter()
             p = cleanup.punctuate(text, cfg.llm_model)
+            timing["ai_punctuation"] = time.perf_counter() - t2
             text, note = p.text, (note if p.used_llm else p.note)
+        t3 = time.perf_counter()
         if cfg.format_mode == "smart":
             text = formatting.format_smart(text, cfg.number_formatting, cfg.spoken_commands)
+        timing["rules"] = time.perf_counter() - t3
+        if timing:
+            log.info("format timing (s): %s", " ".join(f"{k}={v:.3f}" for k, v in timing.items()))  # numbers only
         text = textproc.apply_vocab(text, vocab)
         if cfg.format_mode == "smart" and cfg.styles.get(category) == "casual" and category in ("personal", "work"):
             text = textproc.drop_single_trailing_period(text)
