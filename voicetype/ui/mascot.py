@@ -51,11 +51,25 @@ def _sprite_rect(size: float) -> QRectF:
     return QRectF((size - w) / 2, size * 0.1 + (size * 0.8 - h) / 2, w, h)
 
 
+def _backdrop(p: QPainter, size: float, state: str) -> None:
+    """A dark round badge behind the character, so its black body stays visible on a black or dark-grey desktop.
+    The rim is orange while active; idle is a quiet grey disc."""
+    p.setBrush(QColor(44, 44, 44, 170 if state == IDLE else 225))
+    p.setPen(_pen(ORANGE, max(1.0, size * 0.03)) if state != IDLE else Qt.NoPen)
+    r = size * 0.44
+    p.drawEllipse(QPointF(size / 2, size / 2), r, r)
+
+
 def _draw_sprite(p: QPainter, size: float, opacity: float = 1.0) -> None:
     pm = mascot_pixmap()
     p.setOpacity(opacity)
     if pm is not None:
+        clip = QPainterPath()  # same circle as the backdrop: the image's square corners are cut off
+        clip.addEllipse(QPointF(size / 2, size / 2), size * 0.44, size * 0.44)
+        p.save()
+        p.setClipPath(clip)
         p.drawPixmap(_sprite_rect(size), pm, QRectF(pm.rect()))
+        p.restore()
     else:  # image missing: a plain round shape, so something still shows
         p.setPen(QPen(ORANGE, max(1.0, size * 0.04)))
         p.setBrush(BODY)
@@ -71,7 +85,8 @@ def paint_mascot(p: QPainter, x: float, y: float, size: float, state: str, t: fl
     p.save()
     p.translate(x, y + bob_offset(state, t, reduced) * size / 56.0)
     p.setRenderHint(QPainter.Antialiasing)
-    _draw_sprite(p, size, opacity=0.45 if state == IDLE else 1.0)
+    _backdrop(p, size, state)
+    _draw_sprite(p, size, opacity=0.85 if state == IDLE else 1.0)  # idle: dimmed, still visible
     if state == RECORDING:
         _waves(p, size, t, level)
     elif state in (PROCESSING, INSERTING):

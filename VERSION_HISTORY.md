@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v3.1.2](#v312--2026-10-22) | 2026-10-22 | Mascot made visible on dark desktops (backdrop, idle brighter) |
 | [v3.1.1](#v311--2026-10-22) | 2026-10-22 | Old icons and unused files removed; packaged app installed |
 | [v3.1.0](#v310--2026-10-22) | 2026-10-22 | Approved Flowbit logo and mascot, numbered lists from plain ordinals |
 | [v3.0.0](#v300--2026-10-21) | 2026-10-21 | **Flowbit**: formatting pipeline, mascot, safe undo, shortcut checks |
@@ -18,6 +19,19 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v3.1.2 · 2026-10-22
+**Theme:** The floating mascot was too dark to see on a dark desktop.
+**Why:** Its black body with a thin orange edge blended into the background.
+### Changed
+- A dark round badge sits behind the mascot: grey when idle, with an orange ring while active. The character is clipped to the same circle.
+- Idle brightness raised from 45% to 85%.
+### Tested
+- 193 tests pass. Packaged app rebuilt and started from the Desktop shortcut. Your screenshot shows the mascot in the listening state.
+### Still open
+- The real-desktop mascot test (scripts/it_ui.py) has not been re-run on an idle desktop.
 
 ---
 
