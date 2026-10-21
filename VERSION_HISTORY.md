@@ -4,6 +4,7 @@ Each version records what was built, what changed since the previous version, th
 
 | Version | Date | Theme |
 |---|---|---|
+| [v3.1.1](#v311--2026-10-22) | 2026-10-22 | Old icons and unused files removed; packaged app installed |
 | [v3.1.0](#v310--2026-10-22) | 2026-10-22 | Approved Flowbit logo and mascot, numbered lists from plain ordinals |
 | [v3.0.0](#v300--2026-10-21) | 2026-10-21 | **Flowbit**: formatting pipeline, mascot, safe undo, shortcut checks |
 | [v2.2.1](#v221--2026-10-21) | 2026-10-21 | Fine-tuning pipeline verified end to end; data moved off C |
@@ -17,6 +18,33 @@ Each version records what was built, what changed since the previous version, th
 | [v1.1](#v11--2026-10-20-early-evening) | 2026-10-20, early evening | Language test tool and Wispr Flow research (no app changes) |
 | [v1.0](#v10--2026-10-20-afternoon) | 2026-10-20, afternoon | First working app: local dictation into any window |
 | [v0](#v0--2026-10-20-morning) | 2026-10-20, morning | Tooling and plan, before any code |
+
+---
+
+## v3.1.1 · 2026-10-22
+**Theme:** Clean up the project and install the updated Flowbit.
+**Why:** The old drawn icons and the one-off probe scripts were still in the project, and the installed copy was the old one.
+
+### Removed
+- Old drawn icons: `docs/img/flowbit-logo.svg` and `docs/img/indicator.svg` (replaced by the approved logo).
+- Diagnostic scripts with no references: `scripts/probe_uia.py` and `scripts/probe_paste_timing.py` (their findings are in the docs).
+- Local leftovers, regenerable or empty: the test caches, the old `build/` folder, scratch files in `.tmp/` (about 7.8 GB, mostly the package download cache), and old screenshots in `data/shots/`.
+- Unused imports in the app and scripts.
+- **Not touched:** your Wispr Flow shortcuts (Start Menu, Startup, Desktop). They belong to the Wispr Flow app, not to this project.
+
+### Changed
+- README header uses the approved logo on a dark background (`docs/img/flowbit-logo.png`), so the white wordmark stays visible on GitHub's light pages.
+- The logo cut-outs (`voicetype/assets`) have their smoke faded at the edges, so no square box shows around the mascot.
+- The packaged app is `dist\Flowbit\Flowbit.exe`, with a `Flowbit` shortcut on the Desktop and in the Start Menu. Its data folders are links to the project's `userdata\` and `models\`, so it uses the same history and settings as the source version.
+
+### Tested
+- Packaged app: transcription self-test on the GPU gives the correct list. The GUI starts and shuts down cleanly (`--quit-after`).
+- 193 automated tests pass.
+- pyflakes: no unused imports in the app or tests.
+
+### Still open at v3.1.1
+- Close the old copy before starting the new one: only one Flowbit can run (single-instance lock).
+- The real-desktop mascot test (6/11 last time) needs an idle desktop.
 
 ---
 

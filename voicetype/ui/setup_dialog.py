@@ -1,9 +1,9 @@
 """First-run setup: microphone test, model download, hotkeys."""
-from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QPlainTextEdit, QProgressBar, QPushButton, QStackedWidget,
+from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QProgressBar, QPushButton, QStackedWidget,
                                QVBoxLayout, QWidget)
 
 from .. import models
-from ..audio import MicError, list_inputs, record
+from ..audio import list_inputs, record
 from .settings_page import combo
 from .workers import Job, with_progress
 

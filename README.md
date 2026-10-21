@@ -1,10 +1,10 @@
-<p align="center"><img src="docs/img/flowbit-logo.svg" alt="Flowbit" width="420"></p>
+<p align="center"><img src="docs/img/flowbit-logo.png" alt="Flowbit: the mascot and the Flowbit wordmark" width="320"></p>
 
 **Flowbit is free, private voice typing for Windows.** Click into any text box, hold a key (or click the little mascot), speak, and your words appear, neatly punctuated, with lists and numbers formatted.
 
 Speech recognition and formatting run on your own PC. No account, no subscription, no weekly word limit, and your voice never leaves your computer.
 
-<p align="center"><img src="docs/img/indicator.svg" alt="The Flowbit mascot: dim and still when not recording, bright orange with moving sound waves while recording" width="460"></p>
+
 
 > Not affiliated with or endorsed by Wispr Flow. Flowbit is an independent open-source project that does the same job locally. A public search found a cancelled 2013 US "FLOWBIT" trademark and an unrelated "FlowBits" smart-home app. No conflict was found, but name availability is not guaranteed.
 

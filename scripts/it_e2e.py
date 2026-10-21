@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 Path(home, "settings.json").write_text(json.dumps({"hotkeys": {"hold": "shift+f9", "toggle": "shift+f10", "cancel": "esc", "settings": "shift+f11"}, "first_run_done": True, "model": "small", "language": "en", "unload_minutes": 0}), encoding="utf-8")
 
 import numpy as np
-from it_helpers import Target, stable
+from it_helpers import Target
 from PySide6.QtWidgets import QApplication
 
 from voicetype import insertion as ins

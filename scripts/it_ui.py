@@ -45,7 +45,6 @@ try:
     import win32api
     import win32con
     import win32gui
-    from PySide6.QtCore import QPoint
     check("test window has the keyboard focus before the mascot appears", A.focus() and ins.foreground() == A.hwnd)
     m = Mascot()
     m.configure(True, 0.9, False, None)

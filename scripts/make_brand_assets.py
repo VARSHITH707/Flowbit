@@ -13,8 +13,9 @@ from PySide6.QtGui import QColor, QGuiApplication, QImage, QImageReader
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "voicetype" / "assets"
 # regions of the 1256 px logo (checked by eye on the full image)
-MASCOT = QRect(360, 255, 530, 545)
-WORDMARK = QRect(240, 815, 745, 165)
+MASCOT = QRect(330, 245, 570, 565)  # wider margin: the smoke is faded out towards this edge
+EDGE_FADE = 44  # px (in the 1256 px logo) over which the mascot's smoke fades to transparent at the crop edge
+WORDMARK = QRect(205, 800, 800, 195)
 
 
 BRIGHT = 230  # a pixel at least this light (in every channel) is paper-white
@@ -60,6 +61,8 @@ def to_alpha(img: QImage, soft: bool) -> QImage:
             alpha = max(0, min(255, int((255 - darkest) * 1.25))) if soft else 255
             if c.red() - c.blue() > 60 or darkest >= BRIGHT:  # orange glow, or the white letters: fully opaque
                 alpha = 255
+            edge = min(x, y, w - 1 - x, out.height() - 1 - y)  # no square edge: fade towards the crop boundary
+            alpha = int(alpha * min(1.0, edge / EDGE_FADE))
             out.setPixel(x, y, QColor(c.red(), c.green(), c.blue(), alpha).rgba())
     return out
 

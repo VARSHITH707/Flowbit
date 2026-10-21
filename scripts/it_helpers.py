@@ -3,7 +3,7 @@ import _projtmp  # noqa: F401  (temp files stay in the project)
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-import win32api, win32con, win32gui
+import win32api, win32gui
 
 class Target:
     """A Tk test window we own (safe to start/stop)."""

@@ -208,3 +208,11 @@
 - [x] 12.3 Plain ordinal lists ("first, biryani; second, dosa; third, egg roti; and fifth, buttermilk") and Whisper digit ordinals
   - Evidence: tests/test_formatting.py 58/58; real spoken clip scripts/make_list_clips.ps1 through Whisper and Transcriber.format: correct list, with and without commas.
 - [~] 12.4 Full real-desktop mascot test (scripts/it_ui.py): 6/11 on this run. Another window took focus; the mascot alone keeps focus (checked per state). Re-run on an idle desktop.
+
+## PHASE 13: Clean-up and install (2026-10-22)
+- [x] 13.1 Old drawn icons and unreferenced probes removed; README uses the approved logo on dark
+  - Evidence: git grep found no references; pyflakes clean; tests 193 pass.
+- [x] 13.2 Packaged app rebuilt with the logo files; self-test on GPU; GUI start and clean quit
+  - Evidence: `Flowbit.exe --selftest` exit 0, correct list text, cuda; `Flowbit.exe --quit-after 9000` exit after the timer (log shows "shutting down").
+- [x] 13.3 Desktop and Start Menu shortcut to dist\Flowbit\Flowbit.exe
+  - Evidence: shortcuts created with the packaged icon; Wispr Flow shortcuts left untouched.

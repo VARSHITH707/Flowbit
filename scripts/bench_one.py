@@ -1,5 +1,5 @@
 """Benchmark one model: python scripts/bench_one.py <model> [device]. Prints a JSON line."""
-import json, re, subprocess, sys, time, wave
+import json, re, subprocess, sys, wave
 from pathlib import Path
 import numpy as np, psutil
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
