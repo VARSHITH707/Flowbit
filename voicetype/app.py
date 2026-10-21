@@ -14,6 +14,7 @@ from . import cleanup, insertion, memory
 from .config import Config, data_dir
 from .dictation import DONE, FAILED, PROCESSING, RECORDING, Dictation, Settings
 from .history import History
+from . import hotkeys as hk
 from .hotkeys import Hotkeys
 from .learner import EditWatcher
 from .transcriber import Transcriber
@@ -37,6 +38,7 @@ class Bridge(QObject):
     status = Signal(str)
     show_tab = Signal(str)
     learned = Signal(object)  # list of (heard, written)
+    undo = Signal()
 
 
 def tray_icon(color="#4f8cff") -> QIcon:
@@ -105,7 +107,8 @@ class App:
         """Load the speech model and the local AI in the background so the first dictation is not slow."""
         c = self.holder.cfg
         threading.Thread(target=self._warm_speech, daemon=True, name="asr-warmup").start()
-        if c.cleanup_mode != "smart" or self._warm_model == c.llm_model:
+        uses_ai = (c.format_mode == "smart" and c.ai_cleanup) or c.ai_punctuation
+        if not uses_ai or self._warm_model == c.llm_model:
             return
         self._warm_model = c.llm_model
 
@@ -150,9 +153,25 @@ class App:
         apply_theme(self.qapp, c.theme)
         self.pill.show_when_idle = c.show_idle_pill
         self.pill.set_state(self.dictation.state if self.dictation.state in (RECORDING, PROCESSING) else "idle")
+        self._check_hotkeys()
         self.window.home.refresh_info()
         self._start_hotkeys()
         self._warm_llm()
+
+    def _check_hotkeys(self) -> None:
+        """Move off the old toggle default if another program owns it; report any other clash."""
+        c = self.holder.cfg
+        try:
+            if c.hotkeys.get("toggle") == hk.OLD_TOGGLE and hk.registered_elsewhere(hk.OLD_TOGGLE):
+                c.hotkeys["toggle"] = hk.DEFAULTS["toggle"]
+                c.save()
+                self.window.home.notice.setText(f"{hk.OLD_TOGGLE} is used by another program on this PC, so the toggle "
+                                                f"shortcut is now {hk.DEFAULTS['toggle']} (change it in Settings).")
+            clash = hk.conflicts(c.hotkeys)
+            if clash:
+                self.window.home.notice.setText("Shortcut problem: " + clash)
+        except Exception as e:  # a failed check must never stop the app
+            log.warning("hotkey check failed: %s", type(e).__name__)
 
     def _start_hotkeys(self) -> None:
         if self.hotkeys:
@@ -164,6 +183,7 @@ class App:
             on_toggle=lambda: mode("both", "toggle") and self.dictation.toggle(),
             on_cancel=lambda: self.dictation.state in (RECORDING, PROCESSING) and self.dictation.cancel(),
             on_settings=lambda: self.bridge.show_tab.emit("settings"),
+            on_undo=lambda: self.bridge.undo.emit(),
             bindings=self.holder.cfg.hotkeys)
         try:
             self.hotkeys.start()

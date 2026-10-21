@@ -46,7 +46,7 @@ def test_bad_values_ignored_individually(home):
         "theme": "neon", "max_seconds": "lots", "auto_insert": "yes", "model": "small",
         "hotkeys": {"hold": "ctrl+banana", "toggle": "ctrl+f9"}, "mic": "usb"}), encoding="utf-8")
     c = Config.load()
-    assert c.theme == "system" and c.max_seconds == 300 and c.auto_insert is True and c.model == "small"
+    assert c.theme == "dark" and c.max_seconds == 300 and c.auto_insert is True and c.model == "small"
     assert c.hotkeys["hold"] == "ctrl+alt+d" and c.hotkeys["toggle"] == "ctrl+f9" and c.mic is None
 
 

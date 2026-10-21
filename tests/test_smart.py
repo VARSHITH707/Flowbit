@@ -190,7 +190,7 @@ def test_smart_keeps_raw_and_applies_learned_words(monkeypatch):
     memory.learn([("cubernetes", "Kubernetes")])
     res, seen = smart(monkeypatch, "um we deploy on cubernetes", "We deploy on Kubernetes.")
     assert res.text == "We deploy on Kubernetes." and res.raw == "um we deploy on cubernetes"
-    assert seen["text"] == "um we deploy on Kubernetes"  # learned word fixed before the AI sees it
+    assert seen["text"] == "We deploy on Kubernetes"  # fillers gone, learned word fixed before the AI sees it
     assert "Kubernetes" in seen["terms"]
 
 
@@ -203,9 +203,9 @@ def test_smart_style_follows_app_category(monkeypatch):
 
 def test_smart_unavailable_falls_back_with_note(monkeypatch):
     res, _ = smart(monkeypatch, "hello there", None)
-    assert res.text == "hello there" and "unavailable" in res.note
+    assert res.text == "Hello there." and "unavailable" in res.note  # formatted by the rules instead
 
 
 def test_exact_mode_never_calls_the_ai(monkeypatch):
-    res, seen = smart(monkeypatch, "um hello", "SHOULD NOT BE USED", cleanup_mode="exact")
+    res, seen = smart(monkeypatch, "um hello", "SHOULD NOT BE USED", format_mode="exact")
     assert res.text == "um hello" and seen == {}

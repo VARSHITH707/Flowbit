@@ -35,7 +35,7 @@ def load(name):
 
 
 cfg = Config()
-cfg.cleanup_mode = "smart"
+cfg.format_mode, cfg.ai_cleanup = "smart", True
 t = Transcriber(lambda: cfg)
 t.engine()
 print("local AI warm:", cleanup.warm_up(cfg.llm_model))

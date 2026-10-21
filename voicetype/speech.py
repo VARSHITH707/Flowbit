@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from .cuda import add_cuda_dll_dirs
+from .formatting import join_segments
 
 
 class TranscribeError(RuntimeError):
@@ -56,7 +57,7 @@ class Engine:
         try:
             segs, info = self.model.transcribe(audio, language=language, vad_filter=True,
                                                initial_prompt=vocab, beam_size=5)
-            text = " ".join(s.text.strip() for s in segs).strip()
+            text = join_segments([(s.start, s.end, s.text) for s in segs])
         except Exception as e:
             if self.device == "cuda" and _is_gpu_error(e):  # e.g. out of memory: retry once on CPU
                 self.notice = f"GPU error ({_short(e)}); retried on CPU."

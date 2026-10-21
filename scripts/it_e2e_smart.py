@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 Path(home, "settings.json").write_text(json.dumps({
     "hotkeys": {"hold": "shift+f9", "toggle": "shift+f10", "cancel": "esc", "settings": "shift+f11"},
-    "first_run_done": True, "model": "large-v3-turbo", "language": "en", "cleanup_mode": "smart"}), encoding="utf-8")
+    "first_run_done": True, "model": "large-v3-turbo", "language": "en", "format_mode": "smart", "ai_cleanup": True}), encoding="utf-8")
 
 import numpy as np
 from it_helpers import Target

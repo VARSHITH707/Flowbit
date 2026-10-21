@@ -60,7 +60,7 @@ def test_vocab_hint_to_recogniser_is_off_by_default():
 
     cfg = Config()
     cfg.vocab = ["py side six=>PySide6"]
-    cfg.cleanup_mode = "exact"  # this test is about the recogniser hint, not AI cleanup
+    cfg.format_mode = "exact"  # this test is about the recogniser hint, not AI cleanup
     t = Transcriber(lambda: cfg)
     t._engine, t._key = Eng(), (cfg.model, cfg.device)
     out = t.transcribe(np.ones(16000, "float32") * 0.1)

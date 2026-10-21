@@ -27,7 +27,7 @@ CHOICES = {
     "theme": ("system", "dark", "light"),
     "insertion_method": ("auto", "paste", "type"),
     "focus_policy": ("copy", "insert_anyway"),
-    "cleanup_mode": ("smart", "clean", "exact"),
+    "format_mode": ("smart", "exact"),
 }
 STYLES = ("formal", "casual")
 DEFAULT_STYLES = {"email": "formal", "work": "formal", "personal": "casual", "code": "formal", "other": "formal"}
@@ -48,13 +48,22 @@ class Config:
     auto_insert: bool = True
     insertion_method: str = "auto"
     focus_policy: str = "copy"  # what to do when focus changed during recording
-    theme: str = "system"
-    show_idle_pill: bool = True
+    theme: str = "dark"
+    mascot_visible: bool = True  # the floating Flowbit mascot (always shown while recording)
+    mascot_opacity: float = 0.9
+    mascot_pos: list | None = None  # [x, y] of its top-left corner; None = bottom centre of the main screen
+    reduced_motion: bool = False
     history_enabled: bool = True
     history_days: int = 0  # 0 = keep until deleted
     vocab: list = field(default_factory=list)
     vocab_bias: bool = False  # feed the glossary to the recogniser; can make Whisper add words, so opt-in
-    cleanup_mode: str = "smart"  # smart = local AI cleanup (falls back to plain text when unavailable)
+    format_mode: str = "smart"  # smart = lists, numbers, commands, punctuation; exact = words as recognised
+    ai_cleanup: bool = True  # Smart mode: local AI also removes fillers and self-corrections (Ollama, this PC)
+    ai_punctuation: bool = True  # local AI adds missing punctuation to run-on speech; words may never change
+    number_formatting: bool = True
+    spoken_commands: bool = True  # "new line", "new paragraph", "bullet point" ... in Smart mode
+    commands_in_exact: bool = False  # also obey spoken commands in Exact mode
+    preview: bool = False  # show the text and ask before inserting it
     llm_model: str = "qwen2.5:7b-instruct-q4_K_M"
     styles: dict = field(default_factory=lambda: dict(DEFAULT_STYLES))
     learn_from_edits: bool = True
@@ -83,12 +92,20 @@ class Config:
         return cfg._apply(raw)
 
     def _apply(self, raw: dict) -> "Config":
+        raw = dict(raw)
+        old = raw.get("cleanup_mode")  # settings from before Flowbit: smart / clean / exact
+        if "format_mode" not in raw and old in ("smart", "clean", "exact"):
+            raw["format_mode"] = "exact" if old == "exact" else "smart"
+            raw.setdefault("ai_cleanup", old == "smart")
+        if "mascot_visible" not in raw and isinstance(raw.get("show_idle_pill"), bool):
+            raw["mascot_visible"] = raw["show_idle_pill"]
         for f in fields(self):
             if f.name in raw:
                 v = self._coerce(f.name, raw[f.name], getattr(self, f.name))
                 if v is not _SKIP:
                     setattr(self, f.name, v)
         self.max_seconds = min(max(self.max_seconds, 5), 3600)
+        self.mascot_opacity = min(max(self.mascot_opacity, 0.3), 1.0)
         return self
 
     def _coerce(self, name: str, v, cur):
@@ -102,6 +119,9 @@ class Config:
             return {k: (v.get(k) if isinstance(v, dict) and v.get(k) in STYLES else d) for k, d in DEFAULT_STYLES.items()}
         if name == "mic":
             return v if v is None or (isinstance(v, int) and not isinstance(v, bool)) else _SKIP
+        if name == "mascot_pos":
+            ok = isinstance(v, list) and len(v) == 2 and all(isinstance(x, int) and not isinstance(x, bool) for x in v)
+            return v if ok or v is None else _SKIP
         if name == "vocab":
             return [str(x).strip() for x in v if str(x).strip()] if isinstance(v, list) else cur
         if isinstance(cur, bool):

@@ -58,7 +58,7 @@ audio = np.frombuffer(w.readframes(w.getnframes()), "<i2").astype("float32") / 3
 for model in ("small", "large-v3-turbo"):
     for mode in ("exact", "smart"):
         cfg = Config()
-        cfg.model, cfg.cleanup_mode = model, mode
+        cfg.model, cfg.format_mode, cfg.ai_cleanup = model, mode, mode == "smart"
         out = Transcriber(lambda: cfg).transcribe(audio, language="en")
         print(f"{model} / {mode}: {out.text!r} on {out.device} {('(AI note: ' + out.note + ')') if out.note else ''}")
 print("connections to this PC only (local AI):", len(local))

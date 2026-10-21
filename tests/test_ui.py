@@ -80,7 +80,11 @@ def test_settings_rejects_bad_and_duplicate_hotkeys():
     s.keys["toggle"].setText("ctrl+alt+d")  # same as hold
     s.save()
     assert "different" in s.err.text()
-    s.keys["toggle"].setText("ctrl+alt")  # modifier-only toggle makes no sense
+    s.keys["toggle"].setText("ctrl+alt")  # part of the hold chord ctrl+alt+d
+    s.save()
+    assert "overlap" in s.err.text()
+    s.keys["toggle"].setText("ctrl+alt+t")
+    s.keys["cancel"].setText("ctrl+alt")  # cancel needs a real key
     s.save()
     assert "non-modifier" in s.err.text()
 
@@ -166,13 +170,15 @@ def test_vocab_import_rejects_huge_and_bad_files(tmp_path, monkeypatch):
 
 def test_smart_settings_save_and_reload():
     s = SettingsPage(Holder())
-    s.cleanup.setCurrentIndex(s.cleanup.findData("clean"))
+    s.fmt.setCurrentIndex(s.fmt.findData("exact"))
+    s.ai_cleanup.setChecked(False)
     s.llm.setText("llama3.2:3b")
     s.styles["email"].setCurrentIndex(s.styles["email"].findData("casual"))
     s.learn.setChecked(False)
     s.save()
     c = Config.load()
-    assert (c.cleanup_mode, c.llm_model, c.styles["email"], c.styles["work"], c.learn_from_edits) == ("clean", "llama3.2:3b", "casual", "formal", False)
+    assert (c.format_mode, c.ai_cleanup, c.llm_model, c.styles["email"], c.styles["work"], c.learn_from_edits) == (
+        "exact", False, "llama3.2:3b", "casual", "formal", False)
 
 
 def test_memory_page_lists_and_forgets():

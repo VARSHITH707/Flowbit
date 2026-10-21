@@ -4,7 +4,7 @@ import logging
 import threading
 import time
 
-from . import cleanup, memory, models, textproc
+from . import cleanup, formatting, memory, models, textproc
 from .speech import Engine, Result, TranscribeError
 
 log = logging.getLogger(__name__)
@@ -50,20 +50,42 @@ class Transcriber:
             eng = self.engine()
             res = eng.transcribe(audio, language=language or None, vocab=textproc.vocab_prompt(cfg.vocab) if cfg.vocab_bias else None)
         self._last_used = time.time()
-        vocab = list(cfg.vocab) + memory.vocab_entries()  # your words + words learned from your corrections
-        text = textproc.postprocess(res.text, vocab, "exact" if cfg.cleanup_mode == "smart" else cfg.cleanup_mode)
-        note = ""
-        if cfg.cleanup_mode == "smart" and text.strip():
-            style = cfg.styles.get(category, "formal")
-            terms = tuple(dict.fromkeys(w for _, w in textproc.parse_vocab(vocab)))
-            c = cleanup.clean(text, cfg.llm_model, style=style, terms=terms, examples=tuple(memory.examples()))
-            note = c.note
-            text = textproc.apply_vocab(c.text, vocab)  # your spellings win over the AI's
-            if c.used_llm and style == "casual" and category in ("personal", "work"):
-                text = textproc.drop_single_trailing_period(text)
+        text, note = self.format(res.text, cfg, category)
         if not text.strip():
             raise TranscribeError("No speech detected.")
         return dataclasses.replace(res, text=text, raw=res.text, note=note)
+
+    @staticmethod
+    def format(raw: str, cfg, category: str = "other") -> tuple[str, str]:
+        """Recognised text -> text to insert, plus a note when an optional AI step was skipped.
+
+        Exact : words as recognised; spacing only (+ spoken commands if enabled, + AI punctuation that may not
+                change any word). Smart: fillers removed, optional AI cleanup, then the deterministic formatter
+                (lists, numbers, commands, capitals, sentence ends). Your vocabulary is applied last, so it wins."""
+        vocab = list(cfg.vocab) + memory.vocab_entries()  # your words + words learned from your corrections
+        note, used_ai = "", False
+        if cfg.format_mode == "exact":
+            text = formatting.format_exact(raw)
+            if cfg.commands_in_exact:
+                text = formatting.normalize_spacing(formatting.spoken_commands(text))
+        else:
+            text = textproc.clean(textproc.apply_vocab(raw, vocab))  # your spellings reach the AI already fixed
+            if cfg.spoken_commands:  # explicit cues first, so the AI receives (and keeps) the finished structure
+                text = formatting.lists(formatting.spoken_commands(text))
+            style = cfg.styles.get(category, "formal")
+            if cfg.ai_cleanup and text.strip():
+                terms = tuple(dict.fromkeys(w for _, w in textproc.parse_vocab(vocab)))
+                c = cleanup.clean(text, cfg.llm_model, style=style, terms=terms, examples=tuple(memory.examples()))
+                text, note, used_ai = formatting.keep_line_breaks(text, c.text), c.note, c.used_llm
+        if cfg.ai_punctuation and not used_ai and cleanup.needs_punctuation(text):
+            p = cleanup.punctuate(text, cfg.llm_model)
+            text, note = p.text, (note if p.used_llm else p.note)
+        if cfg.format_mode == "smart":
+            text = formatting.format_smart(text, cfg.number_formatting, cfg.spoken_commands)
+        text = textproc.apply_vocab(text, vocab)
+        if cfg.format_mode == "smart" and cfg.styles.get(category) == "casual" and category in ("personal", "work"):
+            text = textproc.drop_single_trailing_period(text)
+        return text, note
 
     def unload_if_idle(self, minutes: float) -> bool:
         """Free VRAM after `minutes` without use (0 = never)."""

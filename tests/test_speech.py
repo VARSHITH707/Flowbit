@@ -11,7 +11,7 @@ def fake_engine(model, device="cuda"):
 
 
 class Seg:
-    text = " hello world "
+    text, start, end = " hello world ", 0.0, 1.0
 
 
 class Info:

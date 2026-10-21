@@ -3,10 +3,11 @@ import pytest
 from voicetype.hotkeys import Hotkeys, parse
 
 
-def make():
+def make(**bindings):
     ev = []
     h = Hotkeys(lambda: ev.append("start"), lambda: ev.append("stop"), lambda: ev.append("toggle"),
-                lambda: ev.append("cancel"), lambda: ev.append("settings"))
+                lambda: ev.append("cancel"), lambda: ev.append("settings"), on_undo=lambda: ev.append("undo"),
+                bindings={"toggle": "ctrl+alt+space", **bindings})  # chord logic tests use a fixed toggle chord
     return h, ev
 
 
@@ -79,3 +80,30 @@ def test_modifiers_are_never_swallowed():
     h, _ = make()
     assert h._key_down("ctrl") is False and h._key_down("alt") is False
     assert h._key_up("alt") is False and h._key_up("ctrl") is False
+
+
+def test_undo_hotkey_fires_once():
+    h, _ = make()
+    h._key_down("ctrl"); h._key_down("alt"); h._key_down("z"); h._key_down("z")  # auto-repeat
+    assert drain(h) == ["undo"]
+
+
+def test_modifier_only_toggle_fires_on_release_without_other_keys():
+    h, _ = make(toggle="ctrl+windows")
+    h._key_down("ctrl"); h._key_down("windows"); h._key_up("windows"); h._key_up("ctrl")
+    assert drain(h) == ["toggle"]
+    h._key_down("ctrl"); h._key_down("windows"); h._key_down("d"); h._key_up("d"); h._key_up("windows"); h._key_up("ctrl")
+    assert drain(h) == []  # ctrl+win+d (new desktop) must not toggle recording
+    h._key_down("ctrl"); h._key_down("shift"); h._key_down("windows"); h._key_up("windows")
+    assert drain(h) == []  # extra modifier: not the chord
+
+
+def test_modifier_only_shortcut_rejected_for_commands_that_need_a_key():
+    with pytest.raises(ValueError):
+        make(undo="ctrl+alt")
+
+
+def test_conflicts_catch_editing_keys_and_overlaps():
+    from voicetype.hotkeys import DEFAULTS, conflicts
+    assert "Undo" in conflicts({**DEFAULTS, "hold": "ctrl+z"})
+    assert "overlap" in conflicts({**DEFAULTS, "hold": "ctrl+alt", "toggle": "ctrl+alt+t"})
