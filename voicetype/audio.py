@@ -19,9 +19,14 @@ def list_inputs() -> list[tuple[int, str]]:
 
 
 class Recorder:
-    """Push-to-talk style capture. stop() returns audio; cancel() discards it."""
+    """Push-to-talk style capture. stop() returns audio; cancel() discards it.
+
+    Auto-stop (silence_seconds > 0): a block counts as speech when its loudness (RMS) is above the larger of
+    `silence_threshold` and 3x the quietest block heard so far (the room's noise floor), so a noisy room or a
+    loud microphone does not keep it recording forever. `stop_reason` says why it stopped by itself."""
 
     NO_SPEECH_SECONDS = 10  # give up if nothing loud was heard for this long (only when auto-stop is on)
+    NOISE_FACTOR, MAX_ADAPTIVE = 3.0, 0.2
 
     def __init__(self, device: int | None = None, max_seconds: float = 300, on_limit=None,
                  silence_seconds: float = 0, silence_threshold: float = 0.01):
@@ -29,6 +34,8 @@ class Recorder:
         self.device, self.max_samples, self.on_limit = device, int(max_seconds * SAMPLE_RATE), on_limit
         self.silence_samples, self.threshold = int(silence_seconds * SAMPLE_RATE), silence_threshold
         self._heard, self._quiet = False, 0
+        self._noise: float | None = None
+        self.stop_reason = ""  # "limit" | "silence" | "no_speech" when it stopped by itself
         self._chunks: list[np.ndarray] = []
         self._n = 0
         self._stream = None
@@ -44,7 +51,7 @@ class Recorder:
         if self._stream:
             return
         self._chunks, self._n, self._limit_hit = [], 0, False
-        self._heard, self._quiet = False, 0
+        self._heard, self._quiet, self._noise, self.stop_reason = False, 0, None, ""
         try:
             self._stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32",
                                           device=self.device, callback=self._cb)
@@ -59,15 +66,21 @@ class Recorder:
             self._chunks.append(indata[:, 0].copy())
             self._n += frames
             hit = self._n >= self.max_samples
+            reason = "limit" if hit else ""
             if self.silence_samples:
-                if float(np.abs(indata).max()) >= self.threshold:
+                rms = float(np.sqrt(np.mean(np.square(indata)))) if frames else 0.0
+                self._noise = rms if self._noise is None else min(self._noise, rms)
+                if rms >= max(self.threshold, min(self._noise * self.NOISE_FACTOR, self.MAX_ADAPTIVE)):
                     self._heard, self._quiet = True, 0
                 else:
                     self._quiet += frames
-                stopped_after_speech = self._heard and self._quiet >= self.silence_samples
-                gave_up = not self._heard and self._n >= self.NO_SPEECH_SECONDS * SAMPLE_RATE
-                hit = hit or stopped_after_speech or gave_up
+                if not hit and self._heard and self._quiet >= self.silence_samples:
+                    hit, reason = True, "silence"
+                elif not hit and not self._heard and self._n >= self.NO_SPEECH_SECONDS * SAMPLE_RATE:
+                    hit, reason = True, "no_speech"
             hit = hit and not self._limit_hit
+            if hit:
+                self.stop_reason = reason
             self._limit_hit = self._limit_hit or hit
         if hit and self.on_limit:
             # never stop a stream from inside its own callback

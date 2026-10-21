@@ -1,25 +1,26 @@
-"""VoiceType entry point. Run:  python -m voicetype   (add --quit-after 3000 for a smoke test)"""
+"""Flowbit entry point. Run:  python -m voicetype   (add --quit-after 3000 for a smoke test)"""
 import argparse
 import logging
 import sys
 from logging.handlers import RotatingFileHandler
 
-from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QLockFile, QObject, QTimer, Signal
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QSystemTrayIcon
 
 import threading
 
-from . import cleanup, insertion, memory
+from . import cleanup, insertion, memory, undo
 from .config import Config, data_dir
-from .dictation import DONE, FAILED, PROCESSING, RECORDING, Dictation, Settings
+from .dictation import ACTIVE, DONE, FAILED, IDLE, RECORDING, Dictation, Settings
 from .history import History
 from . import hotkeys as hk
 from .hotkeys import Hotkeys
 from .learner import EditWatcher
 from .transcriber import Transcriber
 from .ui.main_window import MainWindow
-from .ui.pill import StatePill
+from .ui.mascot import Mascot, mascot_icon
+from .ui.preview import COPY, INSERT, PreviewDialog
 from .ui.setup_dialog import SetupDialog
 from .ui.theme import apply_theme
 
@@ -38,21 +39,9 @@ class Bridge(QObject):
     status = Signal(str)
     show_tab = Signal(str)
     learned = Signal(object)  # list of (heard, written)
+    toast = Signal(str)
     undo = Signal()
-
-
-def tray_icon(color="#4f8cff") -> QIcon:
-    pm = QPixmap(64, 64)
-    pm.fill(Qt.transparent)
-    p = QPainter(pm)
-    p.setRenderHint(QPainter.Antialiasing)
-    p.setBrush(QColor(color))
-    p.setPen(Qt.NoPen)
-    p.drawRoundedRect(22, 8, 20, 32, 10, 10)
-    p.drawRect(30, 42, 4, 8)
-    p.drawRoundedRect(18, 50, 28, 5, 2, 2)
-    p.end()
-    return QIcon(pm)
+    preview = Signal(object)  # dict: text, target, event, answer
 
 
 def setup_logging() -> None:
@@ -75,8 +64,12 @@ class App:
         self.learner = EditWatcher(on_learned=self.bridge.learned.emit)
         self._warm_model = None
         self.window = MainWindow(self.holder, self.history, self.transcriber)
-        self.pill = StatePill()
-        self.pill.level_source = self.dictation.level  # the logo's bars follow the live mic level
+        self.mascot = Mascot()
+        self.mascot.level_source = self.dictation.level  # its sound waves follow the live mic level
+        self.mascot.menu_actions = [("Open Flowbit", lambda: self.window.show_tab("home")),
+                                    ("Undo last insertion", self.undo_last), ("Settings", lambda: self.window.show_tab("settings")),
+                                    ("Hide mascot when idle", self._hide_mascot)]
+        self.last_insert: undo.Snapshot | None = None
         self.hotkeys: Hotkeys | None = None
         self._build_tray()
         self._connect()
@@ -92,6 +85,12 @@ class App:
         b.status.connect(lambda m: w.home.notice.setText(m))
         b.show_tab.connect(w.show_tab)
         b.learned.connect(self._on_learned)
+        b.undo.connect(self.undo_last)
+        b.toast.connect(lambda m: self.tray.showMessage("Flowbit", m, QSystemTrayIcon.Information, 3500))
+        b.preview.connect(self._show_preview)
+        self.mascot.clicked.connect(self.dictation.toggle)
+        self.mascot.moved.connect(self._mascot_moved)
+        w.home.undo_insert_requested.connect(self.undo_last)
         w.home.toggle_requested.connect(self.dictation.toggle)
         w.home.cancel_requested.connect(self.dictation.cancel)
         w.settings.saved.connect(self.apply_config)
@@ -130,7 +129,7 @@ class App:
     def _on_learned(self, pairs) -> None:
         self.window.memory.refresh()
         shown = ", ".join(f"{h} -> {w}" for h, w in pairs[:3])
-        self.tray.showMessage("VoiceType learned", shown, QSystemTrayIcon.Information, 3000)
+        self.tray.showMessage("Flowbit learned", shown, QSystemTrayIcon.Information, 3000)
 
     def _model_changed(self) -> None:
         if self.transcriber.loaded and self.transcriber.loaded_model != self.holder.cfg.model:
@@ -142,17 +141,61 @@ class App:
                         silence_seconds=c.silence_seconds if c.silence_stop else 0, silence_threshold=c.silence_threshold)
 
     def _insert(self, text: str, target: int):
+        """Runs on the transcription thread. Preview (optional), safe focus restore, insertion, undo snapshot."""
         c = self.holder.cfg
         if c.focus_policy == "insert_anyway":
             target = insertion.foreground()
-        return insertion.insert(text, target, c.insertion_method)
+        if c.preview:
+            ask = {"text": text, "target": target, "event": threading.Event(), "answer": None}
+            self.bridge.preview.emit(ask)
+            ask["event"].wait()
+            choice, text = ask["answer"]
+            if choice == COPY:
+                insertion.set_clipboard(text)
+                return insertion.InsertResult("copied", "Copied to the clipboard (from the preview).")
+            if choice != INSERT:
+                return insertion.InsertResult("failed", "Cancelled in the preview; nothing was inserted.")
+        if insertion.is_own_window(insertion.foreground()) and not insertion.is_own_window(target):
+            insertion.focus_window(target)  # a Flowbit window (preview, settings) is in front: give the cursor back
+        res = insertion.insert(text, target, c.insertion_method)
+        if res.status == "inserted":
+            self.last_insert = undo.capture(text, target)
+        return res
+
+    def _show_preview(self, ask: dict) -> None:
+        exe, title = insertion.window_app(ask["target"])
+        dlg = PreviewDialog(ask["text"], title or exe)
+        dlg.exec()
+        ask["answer"] = (dlg.choice, dlg.text())
+        ask["event"].set()
+
+    def undo_last(self) -> None:
+        """Undo Last Insertion (shortcut, Home button, mascot menu). Runs off the UI thread; reports the outcome."""
+        def run():
+            ok, msg = undo.undo(self.last_insert)
+            if ok:
+                self.last_insert = None
+            self.bridge.status.emit(msg)
+            self.bridge.toast.emit(msg)
+        threading.Thread(target=run, daemon=True, name="undo").start()
+
+    def _mascot_moved(self, x: int, y: int) -> None:
+        self.holder.cfg.mascot_pos = [x, y]
+        self.holder.cfg.save()
+
+    def _hide_mascot(self) -> None:
+        self.holder.cfg.mascot_visible = False
+        self.holder.cfg.save()
+        self.apply_config()
+        self.tray.showMessage("Flowbit", "The mascot now only appears while recording. Turn it back on in Settings.",
+                              QSystemTrayIcon.Information, 4000)
 
     def apply_config(self) -> None:
         c = self.holder.cfg
         self.dictation.s = self._dictation_settings()
         apply_theme(self.qapp, c.theme)
-        self.pill.show_when_idle = c.show_idle_pill
-        self.pill.set_state(self.dictation.state if self.dictation.state in (RECORDING, PROCESSING) else "idle")
+        self.mascot.configure(c.mascot_visible, c.mascot_opacity, c.reduced_motion, c.mascot_pos)
+        self.mascot.set_state(self.dictation.state if self.dictation.state in ACTIVE else IDLE)
         self._check_hotkeys()
         self.window.home.refresh_info()
         self._start_hotkeys()
@@ -178,7 +221,7 @@ class App:
             self.hotkeys.stop_listening()
         mode = lambda *m: self.holder.cfg.recording_mode in m  # noqa: E731
         self.hotkeys = Hotkeys(
-            on_start=lambda: mode("both", "hold") and self.dictation.start(),
+            on_start=lambda: mode("both", "hold") and self.dictation.start("hold"),
             on_stop=lambda: mode("both", "hold") and self.dictation.stop(),
             on_toggle=lambda: mode("both", "toggle") and self.dictation.toggle(),
             on_cancel=lambda: self.dictation.state in (RECORDING, PROCESSING) and self.dictation.cancel(),
@@ -191,27 +234,28 @@ class App:
             QMessageBox.warning(self.window, "Hotkeys unavailable", f"{e}\nYou can still use the Start button in the window.")
 
     def _build_tray(self) -> None:
-        self.tray = QSystemTrayIcon(tray_icon(), self.window)
+        self.tray = QSystemTrayIcon(mascot_icon(64), self.window)
         menu = QMenu()
-        for label, fn in (("Start / stop dictation", self.dictation.toggle), ("Open VoiceType", lambda: self.window.show_tab("home")),
+        for label, fn in (("Start / stop dictation", self.dictation.toggle), ("Undo last insertion", self.undo_last),
+                          ("Open Flowbit", lambda: self.window.show_tab("home")),
                           ("Settings", lambda: self.window.show_tab("settings")), ("Quit", self.quit)):
             a = QAction(label, menu)
             a.triggered.connect(lambda _=False, f=fn: f())
             menu.addAction(a)
         self.tray.setContextMenu(menu)
-        self.tray.setToolTip("VoiceType")
+        self.tray.setToolTip("Flowbit")
         self.tray.activated.connect(lambda r: self.window.show_tab("home") if r == QSystemTrayIcon.Trigger else None)
         self._menu = menu
         self.tray.show()
 
     # ---- UI-thread slots
     def _on_state(self, state: str, detail: str) -> None:
-        self.pill.set_state(state, detail)
-        self.window.home.on_state(state, detail)
+        self.mascot.set_state(state, detail, self.dictation.mode)
+        self.window.home.on_state(state, detail, self.dictation.mode)
         if state == DONE and self.transcriber.notice:
             self.window.home.notice.setText(self.transcriber.notice)
         if state == FAILED:
-            self.tray.showMessage("VoiceType", detail.splitlines()[0][:200] if detail else "Failed", QSystemTrayIcon.Warning, 4000)
+            self.tray.showMessage("Flowbit", detail.splitlines()[0][:200] if detail else "Failed", QSystemTrayIcon.Warning, 4000)
 
     def _on_result(self, res, ins) -> None:
         c = self.holder.cfg
@@ -222,7 +266,7 @@ class App:
             self.history.add(res.text, language=res.language, duration=res.duration, model=c.model, raw=res.raw)
             self.window.history.refresh()
         if ins is not None and ins.status == "copied":
-            self.tray.showMessage("VoiceType", ins.detail, QSystemTrayIcon.Information, 4000)
+            self.tray.showMessage("Flowbit", ins.detail, QSystemTrayIcon.Information, 4000)
         elif ins is None and c.auto_insert and c.learn_from_edits:  # pasted: watch for your corrections
             self.learner.watch(res.text, cleaned=res.text if res.raw.strip() != res.text.strip() else None)
 
@@ -247,7 +291,7 @@ class App:
         self.transcriber.unload()
         self.history.close()
         self.tray.hide()
-        self.pill.hide()
+        self.mascot.hide()
         self.qapp.quit()
 
 
@@ -264,13 +308,14 @@ def main(argv=None) -> int:
         return run(args.selftest, args.selftest_out, args.model)
 
     qapp = QApplication(sys.argv[:1])
-    qapp.setApplicationName("VoiceType")
+    qapp.setApplicationName("Flowbit")
+    qapp.setWindowIcon(mascot_icon(256))
     qapp.setQuitOnLastWindowClosed(False)
     setup_logging()
     lock = QLockFile(str(data_dir() / "voicetype.lock"))
     lock.setStaleLockTime(15000)
     if not lock.tryLock(200):
-        QMessageBox.information(None, "VoiceType", "VoiceType is already running (look for its icon in the tray).")
+        QMessageBox.information(None, "Flowbit", "Flowbit is already running (look for its icon in the tray).")
         return 1
     app = App(qapp)
     app.first_run()

@@ -1,9 +1,13 @@
-from PySide6.QtCore import Signal
+import time
+
+from PySide6.QtCore import QTimer, Signal
 from PySide6.QtWidgets import QApplication, QFrame, QHBoxLayout, QLabel, QPushButton, QTextEdit, QVBoxLayout, QWidget
 
-from ..dictation import DONE, FAILED, IDLE, PROCESSING, RECORDING
+from ..dictation import ACTIVE, DONE, FAILED, IDLE, INSERTING, PROCESSING, RECORDING
 
-STATE_TEXT = {IDLE: "Ready", RECORDING: "Listening...", PROCESSING: "Transcribing...", DONE: "Done", FAILED: "Something went wrong"}
+STATE_TEXT = {IDLE: "Ready", RECORDING: "Listening", PROCESSING: "Transcribing...", INSERTING: "Inserting...", DONE: "Done",
+              FAILED: "Something went wrong"}
+PRIVACY = "Private: speech recognition and formatting run on this PC. Nothing is uploaded."
 
 
 def classify(detail: str) -> tuple[str, str | None, str | None]:
@@ -24,13 +28,18 @@ class HomePage(QWidget):
     open_tab = Signal(str)
     toggle_requested = Signal()
     cancel_requested = Signal()
+    undo_insert_requested = Signal()
 
     def __init__(self, cfg_holder):
         super().__init__()
         self.h = cfg_holder
-        self.title = QLabel("VoiceType", objectName="title")
+        self.title = QLabel("Flowbit", objectName="title")
         self.status = QLabel(STATE_TEXT[IDLE], objectName="title")
         self.info = QLabel("", objectName="muted")
+        self.privacy = QLabel(PRIVACY, objectName="muted")
+        self.privacy.setAccessibleName("Privacy status")
+        self._t0, self._mode = 0.0, ""
+        self._clock = QTimer(self, interval=500, timeout=self._tick)
         self.info.setWordWrap(True)
         self.notice = QLabel("", objectName="muted")
         self.notice.setWordWrap(True)
@@ -58,13 +67,16 @@ class HomePage(QWidget):
         self.undo.setToolTip("Show and copy exactly what was recognised, before the AI cleaned it up")
         self.undo.clicked.connect(self.undo_ai_edit)
         self.undo.setEnabled(False)
+        self.undo_insert = QPushButton("Undo last insertion")
+        self.undo_insert.setToolTip("Removes the text Flowbit last typed, only if that text is unchanged since Flowbit inserted it")
+        self.undo_insert.clicked.connect(self.undo_insert_requested)
         self._raw = ""
         top = QHBoxLayout()
         top.addWidget(self.go)
         top.addWidget(self.cancel)
         top.addStretch()
         lay = QVBoxLayout(self)
-        for w in (self.title, self.status, self.info, self.notice):
+        for w in (self.title, self.status, self.info, self.privacy, self.notice):
             lay.addWidget(w)
         lay.addLayout(top)
         lay.addWidget(self.err_card)
@@ -72,6 +84,7 @@ class HomePage(QWidget):
         bottom = QHBoxLayout()
         bottom.addWidget(self.copy)
         bottom.addWidget(self.undo)
+        bottom.addWidget(self.undo_insert)
         lay.addLayout(bottom)
         self.refresh_info()
         self.on_state(IDLE)
@@ -80,13 +93,22 @@ class HomePage(QWidget):
         c = self.h.cfg
         hk = c.hotkeys
         keys = {"both": f"hold {hk['hold']}  or  press {hk['toggle']}", "hold": f"hold {hk['hold']}", "toggle": f"press {hk['toggle']}"}[c.recording_mode]
-        self.info.setText(f"Dictate: {keys}.  Cancel: {hk['cancel']}.  Model: {c.model}" + (f" on {device}" if device else "") + ".")
+        mode = "Smart Formatting" if c.format_mode == "smart" else "Exact Transcription"
+        self.info.setText(f"Dictate: {keys} (or click the mascot).  Cancel: {hk['cancel']}.  Undo: {hk['undo']}.\n"
+                          f"Text: {mode}.  Model: {c.model}" + (f" on {device}" if device else "") + ".")
 
-    def on_state(self, state: str, detail: str = ""):
+    def on_state(self, state: str, detail: str = "", mode: str = ""):
+        self._state, self._mode = state, mode
+        if state == RECORDING:
+            self._t0 = time.time()
+            self._clock.start()
+        else:
+            self._clock.stop()
         self.status.setText(STATE_TEXT[state])
+        self._tick()
         self.go.setText("Stop" if state == RECORDING else "Start dictation")
-        self.go.setEnabled(state != PROCESSING)
-        self.cancel.setEnabled(state in (RECORDING, PROCESSING))
+        self.go.setEnabled(state not in (PROCESSING, INSERTING))
+        self.cancel.setEnabled(state in ACTIVE)
         if state == FAILED:
             hint, label, action = classify(detail)
             self.err_msg.setText(detail)
@@ -95,9 +117,15 @@ class HomePage(QWidget):
             self.err_btn.setText(label or "")
             self.err_btn.setVisible(bool(label))
             self.err_card.show()
-        elif state in (RECORDING, PROCESSING):
+        elif state in ACTIVE:
             self.err_card.hide()
         self.notice.setText(detail if state in (DONE, IDLE) and detail else self.notice.text() if state == PROCESSING else "")
+
+    def _tick(self):
+        if getattr(self, "_state", IDLE) == RECORDING:
+            s = int(time.time() - self._t0)
+            how = {"hold": "push to talk", "toggle": "toggle"}.get(self._mode, "")
+            self.status.setText(f"Listening  {s // 60}:{s % 60:02d}" + (f"  ({how})" if how else ""))
 
     def set_transcript(self, text: str, raw: str = ""):
         self.text.setPlainText(text)

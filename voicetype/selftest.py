@@ -1,7 +1,7 @@
 """Headless diagnostic: load the model, transcribe a WAV, write the result as JSON.
 
 Used to verify an install (including the packaged .exe, which has no console):
-    VoiceType.exe --selftest sample.wav --selftest-out result.json [--model small]
+    Flowbit.exe --selftest sample.wav --selftest-out result.json [--model small]
 """
 import json
 import sys

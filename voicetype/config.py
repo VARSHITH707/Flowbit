@@ -5,7 +5,7 @@ import os
 from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 
-from . import APP_DIR  # the project folder, or the .exe's folder: everything VoiceType writes lives there
+from . import APP_DIR  # the project folder, or the .exe's folder: everything Flowbit writes lives there
 from .hotkeys import DEFAULTS as HOTKEY_DEFAULTS, parse
 
 log = logging.getLogger(__name__)

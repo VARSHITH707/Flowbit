@@ -1,4 +1,5 @@
-"""Dictation controller: idle -> recording -> processing -> done/failed. UI-agnostic (callbacks)."""
+"""Dictation controller: IDLE -> RECORDING -> PROCESSING -> INSERTING -> DONE (success) -> IDLE, or FAILED.
+UI-agnostic (callbacks). One session at a time: duplicate starts, stops and late results are ignored."""
 import logging
 import threading
 from dataclasses import dataclass
@@ -7,7 +8,10 @@ from . import insertion
 from .audio import MicError, Recorder
 
 log = logging.getLogger(__name__)
-IDLE, RECORDING, PROCESSING, DONE, FAILED = "idle", "recording", "processing", "done", "failed"
+IDLE, RECORDING, PROCESSING, INSERTING, DONE, FAILED = "idle", "recording", "processing", "inserting", "done", "failed"
+ACTIVE = (RECORDING, PROCESSING, INSERTING)
+AUTO_STOP = {"silence": "Stopped automatically after a pause in your speech.",
+             "no_speech": "Stopped: no speech was heard.", "limit": "Stopped at the longest recording length."}
 
 
 @dataclass
@@ -30,6 +34,7 @@ class Dictation:
         self._make_recorder, self._insert, self._fg, self._categorize = recorder_factory, insert, foreground, categorize
         self.last_target = 0  # window the last result was inserted into
         self.state = IDLE
+        self.mode = ""  # "hold" or "toggle": how the current recording was started
         self._lock = threading.RLock()
         self._rec = None
         self._target = 0
@@ -40,14 +45,16 @@ class Dictation:
         self.on_state(state, detail)
 
     def toggle(self) -> None:
-        self.stop() if self.state == RECORDING else self.start()
+        self.stop() if self.state == RECORDING else self.start("toggle")
 
-    def start(self) -> None:
+    def start(self, mode: str = "hold") -> None:
         with self._lock:
-            if self.state in (RECORDING, PROCESSING):
+            if self.state in ACTIVE:
                 return
             self._target = self._fg()
-            self._rec = self._make_recorder(self.s.device, self.s.max_seconds, self.stop, self.s.silence_seconds, self.s.silence_threshold)
+            self.mode, self._auto_note = mode, ""
+            silence = self.s.silence_seconds if mode == "toggle" else 0  # never auto-stop while a key is held
+            self._rec = self._make_recorder(self.s.device, self.s.max_seconds, self._auto_stop, silence, self.s.silence_threshold)
             try:
                 self._rec.start()
             except MicError as e:
@@ -55,6 +62,11 @@ class Dictation:
                 self._set(FAILED, str(e))
                 return
             self._set(RECORDING)
+
+    def _auto_stop(self) -> None:
+        """The recorder stopped by itself (pause, no speech, longest length): say why, then finish normally."""
+        self._auto_note = AUTO_STOP.get(getattr(self._rec, "stop_reason", ""), "")
+        self.stop()
 
     def stop(self) -> None:
         with self._lock:
@@ -80,7 +92,7 @@ class Dictation:
             if self._rec:
                 self._rec.cancel()
                 self._rec = None
-            if self.state in (RECORDING, PROCESSING):
+            if self.state in ACTIVE:
                 self._set(IDLE, "Cancelled.")
 
     def _work(self, audio, gen, target) -> None:
@@ -94,11 +106,18 @@ class Dictation:
         if gen != self._gen:  # cancelled while processing: drop the text
             return
         self.last_target = target
+        note = getattr(self, "_auto_note", "")
         if self.s.auto_insert:
+            with self._lock:
+                if gen != self._gen or self.state != PROCESSING:  # cancelled or already finalised: never insert twice
+                    return
+                self._set(INSERTING)
             ins = self._insert(res.text, target)
+            if gen != self._gen:
+                return
             if ins.status != "inserted":
                 self.on_result(res, ins)
                 self._set(DONE, ins.detail)
                 return
         self.on_result(res, None)
-        self._set(DONE)
+        self._set(DONE, note)

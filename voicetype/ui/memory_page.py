@@ -1,4 +1,4 @@
-"""Memory tab: what VoiceType learned from your corrections (all stored locally in the memory folder)."""
+"""Memory tab: what Flowbit learned from your corrections (all stored locally in the memory folder)."""
 import time
 
 from PySide6.QtCore import QUrl
@@ -12,7 +12,7 @@ from .. import memory
 class MemoryPage(QWidget):
     def __init__(self):
         super().__init__()
-        intro = QLabel("When you fix a word VoiceType typed (for example cubernetes -> Kubernetes), it remembers the fix "
+        intro = QLabel("When you fix a word Flowbit typed (for example cubernetes -> Kubernetes), it remembers the fix "
                        "and writes it your way next time. Names apply after one fix; other words after you fix them twice. "
                        "Everything stays in this PC's memory folder.", objectName="muted")
         intro.setWordWrap(True)
@@ -64,6 +64,6 @@ class MemoryPage(QWidget):
         self.refresh()
 
     def forget_all(self):
-        if QMessageBox.question(self, "Forget everything", "Delete everything VoiceType learned from your corrections?") == QMessageBox.Yes:
+        if QMessageBox.question(self, "Forget everything", "Delete everything Flowbit learned from your corrections?") == QMessageBox.Yes:
             memory.clear_all()
             self.refresh()

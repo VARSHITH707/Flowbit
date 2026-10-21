@@ -12,7 +12,7 @@ TABS = ("home", "history", "memory", "models", "settings")
 class MainWindow(QMainWindow):
     def __init__(self, cfg_holder, history, transcriber):
         super().__init__()
-        self.setWindowTitle("VoiceType")
+        self.setWindowTitle("Flowbit")
         self.resize(760, 640)
         self.home = HomePage(cfg_holder)
         self.history = HistoryPage(history)

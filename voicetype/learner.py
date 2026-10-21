@@ -1,5 +1,5 @@
 """Learn from your corrections, like Wispr Flow's auto-learn: after pasting, watch the same text box; when you
-leave it, compare what VoiceType typed with what you kept, and remember spelling fixes (memory.py rules).
+leave it, compare what Flowbit typed with what you kept, and remember spelling fixes (memory.py rules).
 
 Reads the focused control through Windows UI Automation, locally. Works where the app exposes its text
 (verified: Win11 Notepad, Edge text fields); silently does nothing elsewhere. Never logs the text.

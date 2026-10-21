@@ -1,4 +1,5 @@
-"""Checks 4.2 and 4.4 on the real desktop: pill never takes focus; UI event loop stays responsive while transcribing."""
+"""Real desktop: the Flowbit mascot never takes focus, reacts to a real mouse click and drag; the UI stays
+responsive while transcribing (4.2)."""
 import os
 import sys
 import tempfile
@@ -21,7 +22,7 @@ from voicetype import insertion as ins
 from voicetype.config import Config
 from voicetype.dictation import DONE, FAILED, Dictation, Settings
 from voicetype.transcriber import Transcriber
-from voicetype.ui.pill import StatePill
+from voicetype.ui.mascot import Mascot
 
 app = QApplication(sys.argv[:1])
 res = []
@@ -41,19 +42,58 @@ def pump(sec):
 
 A = Target("VT UI Target")
 try:
-    A.focus()
-    pill = StatePill()
+    import win32api
+    import win32con
+    import win32gui
+    from PySide6.QtCore import QPoint
+    check("test window has the keyboard focus before the mascot appears", A.focus() and ins.foreground() == A.hwnd)
+    m = Mascot()
+    m.configure(True, 0.9, False, None)
+    clicks, moves = [], []
+    m.clicked.connect(lambda: clicks.append(1))
+    m.moved.connect(lambda x, y: moves.append((x, y)))
     seen = []
-    for st, det in [("idle", ""), ("recording", ""), ("processing", ""), ("done", ""), ("failed", "Microphone unavailable: test"), ("idle", "")]:
-        pill.set_state(st, det)
+    for st, det in [("idle", ""), ("recording", ""), ("processing", ""), ("inserting", ""), ("done", ""),
+                    ("failed", "Microphone unavailable: test"), ("idle", "")]:
+        m.set_state(st, det, "toggle")
         pump(0.3)
         seen.append(ins.foreground() == A.hwnd)
-    check("4.4 pill shown in all 5 states, foreground never changed", all(seen), str(seen))
-    import win32gui
-    ex = win32gui.GetWindowLong(int(pill.winId()), -20)
-    check("4.4 pill window has WS_EX_NOACTIVATE + TOOLWINDOW + TRANSPARENT", pill.isVisible() and (ex & 0x08000000) and (ex & 0x80) and (ex & 0x20), hex(ex))
+    check("mascot shown in all 6 states, foreground never changed", all(seen), str(seen))
+    ex = win32gui.GetWindowLong(int(m.winId()), -20)
+    check("mascot window: NOACTIVATE + TOOLWINDOW, and NOT click-through", m.isVisible() and (ex & 0x08000000) and (ex & 0x80) and not (ex & 0x20), hex(ex))
+
+    def mascot_center():  # physical pixels (works with display scaling)
+        l, t, r, b = win32gui.GetWindowRect(int(m.winId()))
+        dpr = (r - l) / m.width()
+        return int(l + (m._mascot_x() + 30) * dpr), int(t + 30 * dpr)
+    old_cursor = win32api.GetCursorPos()
+    try:
+        x, y = mascot_center()
+        win32api.SetCursorPos((x, y))
+        pump(0.15)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
+        pump(0.08)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+        pump(0.4)
+        check("real mouse click on the mascot emits 'clicked' (start/stop recording)", clicks == [1], str(clicks))
+        check("clicking the mascot did not take focus from the app being typed in", ins.foreground() == A.hwnd)
+        before = win32gui.GetWindowRect(int(m.winId()))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
+        for i in range(1, 13):
+            win32api.SetCursorPos((x - 8 * i, y - 4 * i))
+            pump(0.03)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+        pump(0.4)
+        after = win32gui.GetWindowRect(int(m.winId()))
+        check("real mouse drag moves the mascot and reports the new position", len(moves) == 1 and after[:2] != before[:2],
+              f"{before[:2]} -> {after[:2]}, moves={moves}")
+        check("a drag is not counted as a click", clicks == [1])
+        check("dragging did not take focus either", ins.foreground() == A.hwnd)
+    finally:
+        win32api.SetCursorPos(old_cursor)
     ins.insert("still typing here", A.hwnd, "type")
-    check("4.4 typing still reaches the target while pill is visible", "still typing here" in A.text())
+    check("typing still reaches the target while the mascot is visible", "still typing here" in A.text())
+    m.hide()
 
     # 4.2 responsiveness: real worker thread, real model, 5.7 min clip
     cfg = Config.load()

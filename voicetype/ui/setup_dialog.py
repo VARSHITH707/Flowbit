@@ -7,7 +7,7 @@ from ..audio import MicError, list_inputs, record
 from .settings_page import combo
 from .workers import Job, with_progress
 
-INTRO = ("VoiceType turns your speech into text in any app. Everything runs on this PC: no account, no subscription, "
+INTRO = ("Flowbit turns your speech into text in any app. Everything runs on this PC: no account, no subscription, "
          "no word limit, and your audio is never uploaded.\n\nThis takes about two minutes: pick a microphone, "
          "download a speech model once, and you are ready.")
 
@@ -15,7 +15,7 @@ INTRO = ("VoiceType turns your speech into text in any app. Everything runs on t
 class SetupDialog(QDialog):
     def __init__(self, cfg_holder, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Welcome to VoiceType")
+        self.setWindowTitle("Welcome to Flowbit")
         self.setMinimumWidth(520)
         self.h, self._job = cfg_holder, None
         self.pages = QStackedWidget()

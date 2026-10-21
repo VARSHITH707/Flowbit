@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from voicetype.audio import MicError
-from voicetype.dictation import DONE, FAILED, IDLE, PROCESSING, RECORDING, Dictation, Settings
+from voicetype.dictation import DONE, FAILED, IDLE, INSERTING, PROCESSING, RECORDING, Dictation, Settings
 from voicetype.insertion import InsertResult
 from voicetype.speech import Result, TranscribeError
 
@@ -13,9 +13,11 @@ GOOD = np.ones(16000, "float32") * 0.1
 class FakeRec:
     fail = False
     audio = GOOD
+    last = None
 
-    def __init__(self, device, max_seconds, on_limit, *rest):
-        self.cancelled = False
+    def __init__(self, device, max_seconds, on_limit, silence=0, *rest):
+        self.cancelled, self.on_limit, self.silence, self.stop_reason = False, on_limit, silence, ""
+        FakeRec.last = self
 
     def start(self):
         if FakeRec.fail:
@@ -58,7 +60,7 @@ def test_happy_path_inserts_into_original_target():
     d, states, inserted, _ = make(FakeEngine())
     d.start(); d.stop()
     assert wait(lambda: d.state == DONE) and inserted == [("hello", 42)]
-    assert [s for s, _ in states] == [RECORDING, PROCESSING, DONE]
+    assert [s for s, _ in states] == [RECORDING, PROCESSING, INSERTING, DONE]
 
 
 def test_cancel_while_recording_inserts_nothing():
@@ -193,3 +195,41 @@ def test_transcriptions_never_overlap_on_the_same_model():
     [x.start() for x in ths]
     [x.join() for x in ths]
     assert peak[0] == 1
+
+
+def test_auto_stop_only_in_toggle_mode_and_explains_why():
+    d, states, inserted, _ = make(FakeEngine(), silence_seconds=2.0)
+    d.start("hold")
+    assert FakeRec.last.silence == 0  # holding a key: never stop by itself
+    d.stop()
+    assert wait(lambda: d.state == DONE)
+    d.start("toggle")
+    assert FakeRec.last.silence == 2.0 and d.mode == "toggle"
+    FakeRec.last.stop_reason = "silence"
+    FakeRec.last.on_limit()  # the recorder heard a long pause
+    assert wait(lambda: d.state == DONE) and "pause" in states[-1][1] and len(inserted) == 2
+
+
+def test_duplicate_stop_and_start_are_ignored():
+    d, states, inserted, _ = make(FakeEngine(delay=0.2))
+    d.start(); d.stop(); d.stop(); d.start(); d.toggle()
+    assert wait(lambda: d.state == DONE) and len(inserted) == 1
+    assert [s for s, _ in states].count(RECORDING) == 1
+
+
+def test_noisy_room_still_stops_after_speech():
+    fired = []
+    r = Recorder(silence_seconds=1.0, silence_threshold=0.01, on_limit=lambda: fired.append(1))
+    feed(r, 1.0, 0.03)   # fan noise, louder than the fixed threshold
+    feed(r, 2.0, 0.25)   # speech
+    feed(r, 1.2, 0.03)   # back to noise only: that is a pause
+    assert wait(lambda: fired == [1]) and r.stop_reason == "silence"
+
+
+def test_stop_reason_for_limit_and_no_speech():
+    r = Recorder(max_seconds=1, on_limit=lambda: None)
+    feed(r, 1.2, 0.2)
+    assert r.stop_reason == "limit"
+    r2 = Recorder(silence_seconds=1.0, on_limit=lambda: None)
+    feed(r2, 10.5, 0.0)
+    assert r2.stop_reason == "no_speech"

@@ -1,4 +1,4 @@
-"""Local memory: what VoiceType learns from your corrections. Plain JSON in userdata\\memory inside the app folder.
+"""Local memory: what Flowbit learns from your corrections. Plain JSON in userdata\\memory inside the app folder.
 
 learned.json   word corrections learned from your edits   {"heard": "...", "written": "...", "count": n, ...}
 examples.json  your recent edits of AI-cleaned text (cleaned -> what you kept), used as style examples
@@ -20,13 +20,13 @@ _SKIP = re.compile(r"[\d/\\:@_=<>{}()\[\]#$%^&*+|~`]|https?|www\.|\.(com|org|net
 _COMMON = set("a an the and or but to of in on at for with is are was were be been it this that these those i you he she we they "
               "my your our their me him her us them not no yes so do does did have has had will would can could should "
               "there here then than as by from up down out if".split())
-README = """VoiceType memory (everything stays on this PC)
+README = """Flowbit memory (everything stays on this PC)
 
-learned.json   Words VoiceType learned when you corrected its typing. Next time it writes them your way.
+learned.json   Words Flowbit learned when you corrected its typing. Next time it writes them your way.
 examples.json  Recent edits you made to AI-cleaned text; a few are shown to the local AI as examples of your style.
 
-Delete an entry in the app (Memory tab) or edit these files while VoiceType is closed.
-Delete this whole folder to make VoiceType forget everything it learned.
+Delete an entry in the app (Memory tab) or edit these files while Flowbit is closed.
+Delete this whole folder to make Flowbit forget everything it learned.
 """
 
 
@@ -87,7 +87,7 @@ def looks_like_name(heard: str, written: str) -> bool:
 
 
 def corrections_from_edit(inserted: str, final: str) -> list[tuple[str, str]]:
-    """Word substitutions the user made inside the text VoiceType inserted."""
+    """Word substitutions the user made inside the text Flowbit inserted."""
     a, b = inserted.split(), final.split()
     out = []
     for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():

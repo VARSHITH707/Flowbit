@@ -1,12 +1,13 @@
-"""Dark/light/system theme as one stylesheet with a few colour tokens."""
+"""Flowbit theme: black and orange (dark, the brand default), a light variant, or follow Windows."""
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 
+BRAND = dict(black="#0B0B0B", orange="#FF7900", white="#F5F5F5")
 PALETTES = {
-    "dark": dict(bg="#16181d", panel="#1f232b", text="#e8eaed", muted="#9aa0a6", accent="#4f8cff", border="#2e3440",
-                 good="#3ecf8e", bad="#ff6b6b", warn="#f5b942", input="#262b35"),
-    "light": dict(bg="#f6f7f9", panel="#ffffff", text="#1b1f24", muted="#5f6670", accent="#2563eb", border="#d5d9e0",
-                  good="#0f9d58", bad="#d93025", warn="#b26a00", input="#ffffff"),
+    "dark": dict(bg=BRAND["black"], panel="#151515", text=BRAND["white"], muted="#a8a8a8", accent=BRAND["orange"],
+                 border="#2a2a2a", good="#3ecf8e", bad="#ff5c5c", warn="#ffb547", input="#1c1c1c", on_accent="#0B0B0B"),
+    "light": dict(bg="#fafafa", panel="#ffffff", text="#141414", muted="#5c5c5c", accent="#b35000", border="#dadada",
+                  good="#0f8a4f", bad="#c62828", warn="#9a5b00", input="#ffffff", on_accent="#ffffff"),
 }
 
 _QSS = """
@@ -25,7 +26,7 @@ QPushButton {{ background: {panel}; border: 1px solid {border}; border-radius: 5
 QPushButton:hover {{ border-color: {accent}; }}
 QPushButton:focus {{ border: 2px solid {accent}; }}
 QPushButton:disabled {{ color: {muted}; }}
-QPushButton#primary {{ background: {accent}; color: white; border: none; font-weight: 600; }}
+QPushButton#primary {{ background: {accent}; color: {on_accent}; border: none; font-weight: 600; }}
 QPushButton#primary:disabled {{ background: {border}; color: {muted}; }}
 QPushButton#danger {{ color: {bad}; }}
 QLineEdit, QComboBox, QSpinBox, QTextEdit, QPlainTextEdit, QListWidget, QTableWidget {{

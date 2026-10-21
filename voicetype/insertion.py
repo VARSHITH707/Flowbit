@@ -4,6 +4,7 @@ Policy: never paste into a different window. If focus moved (or insertion fails)
 copied to the clipboard instead and the caller is told so.
 """
 import ctypes
+import os
 import time
 from ctypes import wintypes
 from dataclasses import dataclass
@@ -51,6 +52,35 @@ class InsertResult:
 
 def foreground() -> int:
     return win32gui.GetForegroundWindow()
+
+
+def is_own_window(hwnd: int) -> bool:
+    """True for Flowbit's own windows (settings, history, mascot): text must never be inserted there."""
+    if not hwnd:
+        return False
+    pid = wintypes.DWORD()
+    user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+    return pid.value == os.getpid()
+
+
+def focus_window(hwnd: int, timeout: float = 1.0) -> bool:
+    """Bring `hwnd` back to the front (only used when Flowbit's own window took focus, e.g. the preview).
+    Windows only allows this while our process owns the foreground, which is exactly that case."""
+    if not hwnd or not win32gui.IsWindow(hwnd):
+        return False
+    try:
+        if win32gui.IsIconic(hwnd):
+            win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+        win32gui.SetForegroundWindow(hwnd)
+    except pywintypes.error:
+        pass
+    end = time.time() + timeout
+    while time.time() < end:
+        if foreground() == hwnd:
+            time.sleep(0.05)  # let the window restore its own caret before we paste
+            return True
+        time.sleep(0.02)
+    return False
 
 
 def window_app(hwnd: int) -> tuple[str, str]:
@@ -247,6 +277,7 @@ def paste_text(text: str, saved: list | None = None) -> None:
         raise OSError("Clipboard content cannot be restored; refusing to overwrite it")
     before = _occurrences(text)  # None: this app does not expose its text, so the paste cannot be confirmed
     set_clipboard(text)
+    ours = user32.GetClipboardSequenceNumber()
     try:
         try:
             _send(CTRL_V)
@@ -261,7 +292,8 @@ def paste_text(text: str, saved: list | None = None) -> None:
             raise OSError("the paste could not be confirmed")
         time.sleep(0.35 if before is None else 0.1)  # unconfirmed: give the app time to read the clipboard
     finally:
-        restore_clipboard(saved)
+        if user32.GetClipboardSequenceNumber() == ours:  # someone copied something newer meanwhile: keep theirs
+            restore_clipboard(saved)
 
 
 def insert(text: str, target_hwnd: int, method: str = "auto") -> InsertResult:
@@ -269,6 +301,10 @@ def insert(text: str, target_hwnd: int, method: str = "auto") -> InsertResult:
     if not text:
         return InsertResult("failed", "Nothing to insert.")
     try:
+        if is_own_window(target_hwnd):
+            set_clipboard(text)
+            return InsertResult("copied", "Recording started in Flowbit's own window, so the text was not typed there. "
+                                          "It is on the clipboard: click where you want it and press Ctrl+V.")
         if not target_hwnd or not win32gui.IsWindow(target_hwnd) or foreground() != target_hwnd:
             set_clipboard(text)
             return InsertResult("copied", "Focus changed since recording started; text copied to the clipboard.")
