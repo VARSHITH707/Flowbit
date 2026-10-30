@@ -1,4 +1,5 @@
-<p align="center"><img src="docs/img/flowbit-logo.png" alt="Flowbit: the mascot and the Flowbit wordmark" width="320"></p>
+<p align="center"><img src="docs/img/flowbit-logo.png" alt="Flowbit ghost mascot" width="200"></p>
+<h1 align="center">Flowbit</h1>
 
 **Flowbit is free, private voice typing for Windows.** Click into any text box, hold a key (or click the little mascot), speak, and your words appear, neatly punctuated, with lists and numbers formatted.
 
