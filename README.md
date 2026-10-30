@@ -26,8 +26,8 @@ Speech recognition and formatting run on your own PC. No account, no subscriptio
 You need Windows 11 (the only version tested), a microphone, and Python 3.11. An NVIDIA GPU makes it much faster but isn't required.
 
 ```powershell
-git clone https://github.com/VARSHITH707/Unlimited-WisprFlow.git
-cd Unlimited-WisprFlow
+git clone https://github.com/VARSHITH707/Flowbit.git
+cd Flowbit
 uv venv --python 3.11 .venv
 uv pip install --python .venv\Scripts\python.exe -r requirements.txt
 .\.venv\Scripts\python.exe -m voicetype
@@ -104,4 +104,4 @@ Also built with [Ollama](https://ollama.com) and [Qwen2.5](https://github.com/Qw
 
 ## License
 
-[MIT](LICENSE). Use it, change it, and share it. This repository accepts changes only from its owner and collaborators; to suggest something, [open an issue](https://github.com/VARSHITH707/Unlimited-WisprFlow/issues).
+[MIT](LICENSE). Use it, change it, and share it. This repository accepts changes only from its owner and collaborators; to suggest something, [open an issue](https://github.com/VARSHITH707/Flowbit/issues).

@@ -19,8 +19,8 @@ License: [MIT](../LICENSE). You are free to clone, use and modify your own copy.
 
 ## Install
 ```powershell
-git clone https://github.com/VARSHITH707/Unlimited-WisprFlow.git
-cd Unlimited-WisprFlow
+git clone https://github.com/VARSHITH707/Flowbit.git
+cd Flowbit
 uv venv --python 3.11 .venv
 uv pip install --python .venv\Scripts\python.exe -r requirements.txt
 ```
